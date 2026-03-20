@@ -1386,9 +1386,50 @@ function updateLastUpdate(){
 
 // ============================================================
 // PUBLISH & SHARE (using localStorage + URL hash for same-origin)
-// For cross-device sharing we use a free public JSONBin-style approach
+// ============================================================
+// PUBLISH & SHARE
+// Uses npoint.io — free, no API key, works cross-device
+// Docs: https://www.npoint.io/
 // ============================================================
 let publishedShareId = null;
+
+function buildPayload(){
+  const active = vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
+  return {
+    publishedAt: new Date().toISOString(),
+    publishedBy: 'Charterer',
+    v: 2,
+    vessels: active.map(v=>({
+      n:v.name, d:v.dwt, a:v.age, dr:v.draft, sc:v.scrubber,
+      op:v.openPort,
+      od:v.openDate?v.openDate.toISOString():null,
+      ep:v.etaPH?v.etaPH.toISOString():null,
+      ow:v.owner,
+      sr:(v.mergedSources||[v.source]),
+      mk:v.marketed?1:0,
+      of:v.offer||'',
+      uc:v.userComment||'',
+      eo:v.etaOverride?1:0
+    }))
+  };
+}
+
+function inflateVessels(list){
+  return list.map(v=>({
+    id:++idCounter,
+    source: v.sr&&v.sr.length?v.sr[0]:'ssy',
+    name:v.n, dwt:v.d, age:v.a, draft:v.dr, scrubber:v.sc||'?',
+    openPort:v.op,
+    openDate:v.od?new Date(v.od):null,
+    etaPH:v.ep?new Date(v.ep):null,
+    owner:v.ow, marketed:v.mk===1||v.mk===true,
+    offer:v.of||'', userComment:v.uc||'',
+    etaOverride:v.eo===1||v.eo===true,
+    aisDest:'',comment:'',deleted:false,isDuplicate:false,
+    isMergedSecondary:false,
+    mergedSources:v.sr&&v.sr.length>1?v.sr:null
+  }));
+}
 
 async function publishList(){
   const active=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
@@ -1397,98 +1438,111 @@ async function publishList(){
   const statusEl=document.getElementById('publishStatus');
   statusEl.textContent='⏳ Publishing...';statusEl.className='publish-status loading';
 
-  // Serialise list
-  const payload={
-    publishedAt: new Date().toISOString(),
-    publishedBy: 'Charterer',
-    vessels: active.map(v=>({
-      name:v.name, dwt:v.dwt, age:v.age, draft:v.draft, scrubber:v.scrubber,
-      openPort:v.openPort, openDate:v.openDate?v.openDate.toISOString():null,
-      etaPH:v.etaPH?v.etaPH.toISOString():null, owner:v.owner,
-      sources:(v.mergedSources||[v.source]),
-      marketed:v.marketed, offer:v.offer, userComment:v.userComment,
-      etaOverride:v.etaOverride
-    }))
-  };
+  const payload = buildPayload();
 
+  // ---- Try npoint.io (free, no API key, public JSON storage) ----
   try {
-    // Use JSONBin.io free tier — no auth needed for public bins
-    const resp = await fetch('https://api.jsonbin.io/v3/b', {
+    // Create a new bin
+    const resp = await fetch('https://api.npoint.io/bins', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Bin-Private': 'false',
-        'X-Bin-Name': 'Cape Desk Tonnage '+new Date().toLocaleDateString()
-      },
-      body: JSON.stringify(payload)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: payload })
     });
 
-    if(!resp.ok) throw new Error('API error '+resp.status);
+    if(!resp.ok) throw new Error('npoint ' + resp.status);
     const data = await resp.json();
-    const binId = data.metadata.id;
+    const binId = data.id || data._id;
+    if(!binId) throw new Error('no bin id returned');
+
     publishedShareId = binId;
+    const shareUrl = window.location.href.split('?')[0] + '?view=' + binId;
+    document.getElementById('shareUrlDisplay').textContent = shareUrl;
+    document.getElementById('shareUrlModal').textContent = shareUrl;
 
-    const shareUrl = window.location.href.split('?')[0]+'?view='+binId;
-    document.getElementById('shareUrlDisplay').textContent=shareUrl;
-    document.getElementById('shareUrlModal').textContent=shareUrl;
-
-    // Show published badge
-    const now=new Date();
+    const now = new Date();
     document.getElementById('publishedBadge').style.display='flex';
-    document.getElementById('publishedTime').textContent=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+    document.getElementById('publishedTime').textContent =
+      now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
 
-    statusEl.textContent='✓ Published! Click link above to copy & share.';statusEl.className='publish-status ok';
+    statusEl.textContent='✓ Published! Copy the link below and share with colleagues.';
+    statusEl.className='publish-status ok';
     document.getElementById('shareModal').classList.add('open');
+    localStorage.setItem(STORAGE_KEY+'_latest', JSON.stringify({binId, src:'npoint', publishedAt:now.toISOString()}));
+    return;
 
-    // Save locally too
-    localStorage.setItem(STORAGE_KEY+'_latest', JSON.stringify({binId,publishedAt:now.toISOString()}));
-  } catch(e) {
-    // Fallback: encode in URL (works for smaller lists, same device)
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload)))).substring(0,2000);
-    statusEl.textContent = '⚠ Could not reach share server. Encoded link created (same device only).';
-    statusEl.className='publish-status err';
-    console.warn('Publish error:', e);
+  } catch(e){ console.warn('npoint failed:', e); }
+
+  // ---- Fallback: encode entire payload in the URL hash ----
+  // Works for sharing within same session / small lists only
+  try {
+    const json = JSON.stringify(payload);
+    const encoded = btoa(unescape(encodeURIComponent(json)));
+    const shareUrl = window.location.href.split('?')[0] + '?viewdata=' + encoded;
+
+    document.getElementById('shareUrlDisplay').textContent = shareUrl;
+    document.getElementById('shareUrlModal').textContent = shareUrl;
+
+    const now = new Date();
+    document.getElementById('publishedBadge').style.display='flex';
+    document.getElementById('publishedTime').textContent =
+      now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+
+    statusEl.textContent = '✓ Published (encoded link). Share URL with colleagues — works for lists up to ~150 vessels.';
+    statusEl.className = 'publish-status ok';
+    document.getElementById('shareModal').classList.add('open');
+  } catch(e2){
+    statusEl.textContent = '⚠ Publish failed: ' + e2.message;
+    statusEl.className = 'publish-status err';
   }
 }
 
 async function loadSharedView(){
-  const params=new URLSearchParams(window.location.search);
-  const binId=params.get('view');
-  if(!binId) return;
+  const params = new URLSearchParams(window.location.search);
+  const binId    = params.get('view');
+  const viewdata = params.get('viewdata');
+
+  if(!binId && !viewdata) return;
 
   // Show view-only banner, hide sidebar
   document.getElementById('viewBanner').classList.add('show');
   document.getElementById('sidebar').style.display='none';
   document.getElementById('mainLayout').style.gridTemplateColumns='1fr';
 
-  try {
-    const resp=await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`);
-    if(!resp.ok) throw new Error('Could not load shared data.');
-    const data=await resp.json();
-    const payload=data.record;
+  let payload = null;
 
-    vessels=payload.vessels.map((v,i)=>({
-      id:++idCounter,
-      source:v.sources&&v.sources.length?v.sources[0]:'ssy',
-      name:v.name, dwt:v.dwt, age:v.age, draft:v.draft, scrubber:v.scrubber||'?',
-      openPort:v.openPort,
-      openDate:v.openDate?new Date(v.openDate):null,
-      etaPH:v.etaPH?new Date(v.etaPH):null,
-      owner:v.owner, marketed:v.marketed||false,
-      offer:v.offer||'', userComment:v.userComment||'',
-      etaOverride:v.etaOverride||false,
-      aisDest:'',comment:'',deleted:false,isDuplicate:false,
-      isMergedSecondary:false,
-      mergedSources:v.sources&&v.sources.length>1?v.sources:null
-    }));
-
-    const pubTime=new Date(payload.publishedAt);
-    document.getElementById('viewBanner').innerHTML=`<span>👁 VIEW MODE — Tonnage list published by Charterer at ${pubTime.toLocaleString()}. ${vessels.length} vessels.</span><button class="action-btn" style="border-color:var(--blue);color:var(--blue);font-size:9px" onclick="loadSharedView()">↻ REFRESH</button>`;
-
-    renderTable(); updateStats();
-  } catch(e) {
-    document.getElementById('viewBanner').innerHTML='<span style="color:var(--red)">⚠ Could not load shared tonnage list. '+e.message+'</span>';
+  // ---- Try npoint.io ----
+  if(binId) {
+    try {
+      const resp = await fetch(`https://api.npoint.io/bins/${binId}`);
+      if(!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      payload = data.contents || data;
+    } catch(e){ console.warn('npoint load failed:', e); }
   }
+
+  // ---- Fallback: decode from URL ----
+  if(!payload && viewdata) {
+    try {
+      payload = JSON.parse(decodeURIComponent(escape(atob(viewdata))));
+    } catch(e){ console.warn('URL decode failed:', e); }
+  }
+
+  if(!payload || !payload.vessels) {
+    document.getElementById('viewBanner').innerHTML =
+      '<span style="color:var(--red)">⚠ Could not load tonnage list. The link may have expired.</span>';
+    return;
+  }
+
+  vessels = inflateVessels(payload.vessels);
+  const pubTime = new Date(payload.publishedAt);
+  const timeStr = pubTime.toLocaleString('en-SG', {timeZone:'Asia/Singapore',
+    day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+
+  document.getElementById('viewBanner').innerHTML =
+    `<span>👁 VIEW MODE — Published ${timeStr} SGT &nbsp;·&nbsp; ${vessels.length} vessels</span>` +
+    `<button class="action-btn" style="border-color:var(--blue);color:var(--blue);font-size:9px" onclick="loadSharedView()">↻ REFRESH</button>`;
+
+  renderTable(); updateStats();
 }
 
 function copyShareUrl(){
@@ -1560,8 +1614,8 @@ initSlider();
 renderTable();
 updateStats();
 
-// Auto-load shared view if URL has ?view= param
-if(window.location.search.includes('view=')) loadSharedView();
+// Auto-load shared view if URL has ?view= or ?viewdata= param
+if(window.location.search.includes('view=') || window.location.search.includes('viewdata=')) loadSharedView();
 </script>
 </body>
 </html>
