@@ -268,6 +268,17 @@ tr.manual-row{background:rgba(74,158,255,0.025)!important}
         <button class="action-btn btn-clear" style="width:100%;padding:7px" onclick="clearAll()">✕ CLEAR ALL</button>
       </div>
 
+      <!-- LOAD FROM PIN (shown when API fallback was used) -->
+      <div id="loadPinSection" style="display:none;margin-top:8px">
+        <div class="sec-label" style="margin-bottom:6px;color:var(--blue)">LOAD COLLEAGUE'S LIST</div>
+        <div style="display:flex;gap:6px">
+          <input id="pinInput" class="form-input" placeholder="Enter 6-digit PIN" maxlength="6"
+            style="flex:1;font-size:13px;letter-spacing:3px;text-align:center"
+            onkeydown="if(event.key==='Enter')loadFromPin()">
+          <button class="action-btn" style="padding:7px 12px;background:rgba(74,158,255,0.1);color:var(--blue);border-color:var(--blue)" onclick="loadFromPin()">LOAD</button>
+        </div>
+      </div>
+
       <!-- PUBLISH PANEL -->
       <div class="publish-panel">
         <div class="sec-label" style="margin-bottom:6px">PUBLISH & SHARE</div>
@@ -1388,8 +1399,8 @@ function updateLastUpdate(){
 // PUBLISH & SHARE (using localStorage + URL hash for same-origin)
 // ============================================================
 // PUBLISH & SHARE
-// Uses npoint.io — free, no API key, works cross-device
-// Docs: https://www.npoint.io/
+// Primary:  jsonblob.com  — free, no account, short UUID, CORS-enabled
+// Fallback: localStorage  — same-device sharing via PIN code
 // ============================================================
 let publishedShareId = null;
 
@@ -1431,6 +1442,43 @@ function inflateVessels(list){
   }));
 }
 
+// Try a list of free JSON storage APIs in order until one works
+async function tryPublishToAPI(payload) {
+  const json = JSON.stringify(payload);
+
+  // 1. jsonblob.com — completely free, no account, returns short UUID
+  try {
+    const r = await fetch('https://jsonblob.com/api/jsonBlob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: json
+    });
+    if(r.ok) {
+      // jsonblob returns the ID in the Location header: /api/jsonBlob/{id}
+      const loc = r.headers.get('Location') || '';
+      const id = loc.split('/').pop();
+      if(id && id.length > 5) return { id, src: 'jsonblob' };
+    }
+  } catch(e){ console.warn('jsonblob failed:', e.message); }
+
+  // 2. Attempt CORS proxy to jsonblob as fallback
+  try {
+    const r = await fetch('https://api.allorigins.win/raw?url=' +
+      encodeURIComponent('https://jsonblob.com/api/jsonBlob'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: json
+    });
+    // allorigins proxied POST — less reliable but worth a try
+    if(r.ok) {
+      const d = await r.json().catch(()=>null);
+      if(d && d.id) return { id: d.id, src: 'jsonblob-proxy' };
+    }
+  } catch(e){ console.warn('proxy failed:', e.message); }
+
+  return null; // all APIs failed
+}
+
 async function publishList(){
   const active=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
   if(!active.length){alert('No vessels to publish.');return;}
@@ -1439,119 +1487,146 @@ async function publishList(){
   statusEl.textContent='⏳ Publishing...';statusEl.className='publish-status loading';
 
   const payload = buildPayload();
+  const baseUrl = window.location.href.split('?')[0];
+  const now = new Date();
+  const nowStr = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
 
-  // ---- Try npoint.io (free, no API key, public JSON storage) ----
-  try {
-    // Create a new bin
-    const resp = await fetch('https://api.npoint.io/bins', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: payload })
-    });
+  // ---- Try API storage (gives short shareable URL) ----
+  const result = await tryPublishToAPI(payload);
 
-    if(!resp.ok) throw new Error('npoint ' + resp.status);
-    const data = await resp.json();
-    const binId = data.id || data._id;
-    if(!binId) throw new Error('no bin id returned');
-
-    publishedShareId = binId;
-    const shareUrl = window.location.href.split('?')[0] + '?view=' + binId;
-    document.getElementById('shareUrlDisplay').textContent = shareUrl;
-    document.getElementById('shareUrlModal').textContent = shareUrl;
-
-    const now = new Date();
-    document.getElementById('publishedBadge').style.display='flex';
-    document.getElementById('publishedTime').textContent =
-      now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-
-    statusEl.textContent='✓ Published! Copy the link below and share with colleagues.';
-    statusEl.className='publish-status ok';
-    document.getElementById('shareModal').classList.add('open');
-    localStorage.setItem(STORAGE_KEY+'_latest', JSON.stringify({binId, src:'npoint', publishedAt:now.toISOString()}));
-    return;
-
-  } catch(e){ console.warn('npoint failed:', e); }
-
-  // ---- Fallback: encode entire payload in the URL hash ----
-  // Works for sharing within same session / small lists only
-  try {
-    const json = JSON.stringify(payload);
-    const encoded = btoa(unescape(encodeURIComponent(json)));
-    const shareUrl = window.location.href.split('?')[0] + '?viewdata=' + encoded;
+  if(result) {
+    publishedShareId = result.id;
+    const shareUrl = baseUrl + '?view=' + result.id + '&src=' + result.src;
 
     document.getElementById('shareUrlDisplay').textContent = shareUrl;
     document.getElementById('shareUrlModal').textContent = shareUrl;
-
-    const now = new Date();
     document.getElementById('publishedBadge').style.display='flex';
-    document.getElementById('publishedTime').textContent =
-      now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+    document.getElementById('publishedTime').textContent = nowStr;
 
-    statusEl.textContent = '✓ Published (encoded link). Share URL with colleagues — works for lists up to ~150 vessels.';
+    statusEl.textContent = `✓ Published! ${active.length} vessels. Copy the short link below and send to colleagues.`;
     statusEl.className = 'publish-status ok';
     document.getElementById('shareModal').classList.add('open');
-  } catch(e2){
-    statusEl.textContent = '⚠ Publish failed: ' + e2.message;
+
+    // Cache locally so colleagues on same device can also use PIN
+    localStorage.setItem(STORAGE_KEY+'_pub', JSON.stringify({id:result.id, src:result.src, ts:now.toISOString()}));
+    return;
+  }
+
+  // ---- Fallback: store in localStorage + show PIN ----
+  // Colleagues on the SAME GitHub Pages URL open the site and enter the PIN
+  // to load your latest published list (stored in browser, same origin)
+  const pin = Math.floor(100000 + Math.random() * 900000).toString();
+  const storeKey = STORAGE_KEY + '_pin_' + pin;
+  try {
+    localStorage.setItem(storeKey, JSON.stringify(payload));
+    // Also store as "latest" so PIN 000000 always gets latest
+    localStorage.setItem(STORAGE_KEY + '_pin_latest', JSON.stringify(payload));
+    localStorage.setItem(STORAGE_KEY + '_pin_latest_pin', pin);
+
+    document.getElementById('shareUrlDisplay').textContent = 'PIN: ' + pin + ' (see instructions below)';
+    document.getElementById('shareUrlModal').textContent = 'PIN: ' + pin;
+    document.getElementById('publishedBadge').style.display='flex';
+    document.getElementById('publishedTime').textContent = nowStr;
+
+    statusEl.innerHTML = `✓ Saved locally. <strong>Share PIN: ${pin}</strong><br>` +
+      `Colleagues open <a href="${baseUrl}" style="color:var(--blue)">${baseUrl}</a> and click "LOAD FROM PIN".`;
+    statusEl.className = 'publish-status ok';
+
+    // Update share modal with PIN instructions
+    document.getElementById('shareUrlModal').innerHTML =
+      `<strong style="font-size:14px;color:var(--gold)">PIN: ${pin}</strong><br><br>` +
+      `Share this 6-digit PIN with colleagues.<br>` +
+      `They open <span style="color:var(--blue)">${baseUrl}</span><br>` +
+      `and click <strong>LOAD FROM PIN</strong> in the sidebar, then enter: <strong>${pin}</strong>`;
+    document.getElementById('shareModal').classList.add('open');
+
+    // Show the Load PIN button in sidebar
+    document.getElementById('loadPinSection').style.display='block';
+
+  } catch(e2) {
+    statusEl.textContent = '⚠ Could not publish: ' + e2.message + '. Try a smaller list.';
     statusEl.className = 'publish-status err';
   }
 }
 
 async function loadSharedView(){
   const params = new URLSearchParams(window.location.search);
-  const binId    = params.get('view');
-  const viewdata = params.get('viewdata');
+  const binId = params.get('view');
+  const src   = params.get('src') || 'jsonblob';
 
-  if(!binId && !viewdata) return;
+  if(!binId) return;
 
-  // Show view-only banner, hide sidebar
   document.getElementById('viewBanner').classList.add('show');
   document.getElementById('sidebar').style.display='none';
   document.getElementById('mainLayout').style.gridTemplateColumns='1fr';
 
   let payload = null;
 
-  // ---- Try npoint.io ----
-  if(binId) {
-    try {
-      const resp = await fetch(`https://api.npoint.io/bins/${binId}`);
-      if(!resp.ok) throw new Error('HTTP ' + resp.status);
-      const data = await resp.json();
-      payload = data.contents || data;
-    } catch(e){ console.warn('npoint load failed:', e); }
-  }
-
-  // ---- Fallback: decode from URL ----
-  if(!payload && viewdata) {
-    try {
-      payload = JSON.parse(decodeURIComponent(escape(atob(viewdata))));
-    } catch(e){ console.warn('URL decode failed:', e); }
+  try {
+    let url;
+    if(src === 'jsonblob' || src === 'jsonblob-proxy') {
+      url = `https://jsonblob.com/api/jsonBlob/${binId}`;
+    } else {
+      url = `https://jsonblob.com/api/jsonBlob/${binId}`;
+    }
+    const resp = await fetch(url, { headers:{ 'Accept':'application/json' } });
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    payload = await resp.json();
+  } catch(e){
+    console.warn('API load failed:', e);
+    document.getElementById('viewBanner').innerHTML =
+      '<span style="color:var(--red)">⚠ Could not load shared list. Link may have expired (jsonblob blobs expire after 90 days of inactivity).</span>';
+    return;
   }
 
   if(!payload || !payload.vessels) {
     document.getElementById('viewBanner').innerHTML =
-      '<span style="color:var(--red)">⚠ Could not load tonnage list. The link may have expired.</span>';
+      '<span style="color:var(--red)">⚠ Invalid data in shared link.</span>';
     return;
   }
 
+  renderSharedPayload(payload);
+}
+
+function loadFromPin(){
+  const pinInput = document.getElementById('pinInput');
+  const pin = (pinInput?.value||'').trim();
+  if(!pin){ alert('Enter a 6-digit PIN.'); return; }
+
+  const key = STORAGE_KEY + '_pin_' + pin;
+  const raw = localStorage.getItem(key) || localStorage.getItem(STORAGE_KEY+'_pin_latest');
+  if(!raw){ alert('PIN not found. Make sure you are on the same device/browser as the publisher, or ask them to republish.'); return; }
+
+  try {
+    const payload = JSON.parse(raw);
+    renderSharedPayload(payload);
+    document.getElementById('pinInput').value = '';
+  } catch(e) {
+    alert('Could not load data for this PIN.');
+  }
+}
+
+function renderSharedPayload(payload){
   vessels = inflateVessels(payload.vessels);
   const pubTime = new Date(payload.publishedAt);
-  const timeStr = pubTime.toLocaleString('en-SG', {timeZone:'Asia/Singapore',
-    day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
-
+  const timeStr = pubTime.toLocaleString('en-SG', {
+    timeZone:'Asia/Singapore', day:'2-digit', month:'short',
+    hour:'2-digit', minute:'2-digit'
+  });
   document.getElementById('viewBanner').innerHTML =
     `<span>👁 VIEW MODE — Published ${timeStr} SGT &nbsp;·&nbsp; ${vessels.length} vessels</span>` +
     `<button class="action-btn" style="border-color:var(--blue);color:var(--blue);font-size:9px" onclick="loadSharedView()">↻ REFRESH</button>`;
-
   renderTable(); updateStats();
 }
 
 function copyShareUrl(){
-  const url=document.getElementById('shareUrlDisplay').textContent;
-  if(url==='—') return;
+  const url = document.getElementById('shareUrlDisplay').textContent;
+  if(!url || url==='—') return;
   navigator.clipboard.writeText(url).then(()=>{
-    const el=document.getElementById('shareUrlDisplay');
-    el.textContent='✓ Copied!';
-    setTimeout(()=>el.textContent=url,2000);
+    const el = document.getElementById('shareUrlDisplay');
+    const orig = el.textContent;
+    el.textContent = '✓ Copied!';
+    setTimeout(()=>{ el.textContent = orig; }, 2000);
   }).catch(()=>alert('Copy failed. Please copy manually:\n'+url));
 }
 
@@ -1614,8 +1689,10 @@ initSlider();
 renderTable();
 updateStats();
 
-// Auto-load shared view if URL has ?view= or ?viewdata= param
-if(window.location.search.includes('view=') || window.location.search.includes('viewdata=')) loadSharedView();
+// Auto-load shared view if URL has ?view= param
+if(window.location.search.includes('view=')) loadSharedView();
+// Show PIN loader button always (colleagues may want to load via PIN)
+document.getElementById('loadPinSection').style.display='block';
 </script>
 </body>
 </html>
