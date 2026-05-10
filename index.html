@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TONNAGE PARSER — Port Hedland Supply Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#08090c;--bg2:#0d1017;--bg3:#121620;--bg4:#171c28;
+  --border:#1c2230;--border2:#252e40;
+  --gold:#f0b429;--teal:#00d4aa;--red:#ff4757;--blue:#4a9eff;--purple:#a78bfa;--orange:#ff6b35;
+  --text:#e2e8f4;--text2:#8896a8;--text3:#4a5568;
+  --ssy:#a78bfa;--arrow:#00d4aa;--ifchor:#4a9eff;--marketed:#f0b429;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;overflow-x:hidden}
+
+/* HEADER */
+.hdr{background:var(--bg2);border-bottom:2px solid var(--gold);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;gap:10px;flex-wrap:wrap}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold);display:flex;align-items:center;gap:10px}
+.logo-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:2px;border-left:1px solid var(--border2);padding-left:10px;line-height:1.5}
+.hdr-stats{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stat-pill{background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:4px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;display:flex;align-items:center;gap:5px}
+.stat-val{font-weight:600}
+.stat-ssy{color:var(--ssy)}.stat-arrow{color:var(--arrow)}.stat-ifchor{color:var(--ifchor)}.stat-total{color:var(--gold);font-size:13px}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 57px)}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.sidebar-section{padding:12px 14px;border-bottom:1px solid var(--border)}
+.sec-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+textarea.paste-box{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:4px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;padding:8px;resize:none;height:160px;outline:none;line-height:1.6;transition:border-color 0.15s}
+textarea.paste-box:focus{border-color:var(--gold)}
+textarea.paste-box::placeholder{color:var(--text3)}
+.parse-btn{width:100%;margin-top:6px;padding:8px;border:none;border-radius:4px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1px;transition:all 0.15s}
+.parse-btn.ssy{background:rgba(167,139,250,0.15);color:var(--ssy);border:1px solid var(--ssy)}
+.parse-btn.ssy:hover{background:rgba(167,139,250,0.25)}
+.parse-btn.arrow{background:rgba(0,212,170,0.12);color:var(--arrow);border:1px solid var(--arrow)}
+.parse-btn.arrow:hover{background:rgba(0,212,170,0.22)}
+.parse-btn.ifchor{background:rgba(74,158,255,0.12);color:var(--ifchor);border:1px solid var(--ifchor)}
+.parse-btn.ifchor:hover{background:rgba(74,158,255,0.22)}
+.parse-result{margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:5px 8px;border-radius:3px;display:none}
+.parse-result.ok{background:rgba(0,212,170,0.08);color:var(--teal);border:1px solid rgba(0,212,170,0.2)}
+.parse-result.err{background:rgba(255,71,87,0.08);color:var(--red);border:1px solid rgba(255,71,87,0.2)}
+.action-btn{padding:5px 12px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;cursor:pointer;border:1px solid;letter-spacing:0.5px;transition:all 0.15s;white-space:nowrap}
+.btn-export{background:rgba(0,212,170,0.1);color:var(--teal);border-color:var(--teal)}
+.btn-export:hover{background:rgba(0,212,170,0.2)}
+.btn-clear{background:rgba(255,71,87,0.08);color:var(--red);border-color:var(--red)}
+.btn-clear:hover{background:rgba(255,71,87,0.15)}
+.btn-publish{background:rgba(240,180,41,0.15);color:var(--gold);border-color:var(--gold);font-size:12px;padding:8px 16px;width:100%;margin-top:6px}
+.btn-publish:hover{background:rgba(240,180,41,0.25)}
+.btn-add-row{background:rgba(74,158,255,0.1);color:var(--blue);border-color:var(--blue)}
+.btn-add-row:hover{background:rgba(74,158,255,0.2)}
+
+/* FILTER BAR — two rows */
+.filter-wrap{background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.filter-row{padding:7px 14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.filter-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1.5px;white-space:nowrap}
+
+/* Multi-select chips — click toggles, no shift needed */
+.filter-chip{padding:3px 9px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;border:1px solid var(--border2);color:var(--text3);background:var(--bg3);transition:all 0.12s;white-space:nowrap;user-select:none}
+.filter-chip:hover{color:var(--text2)}
+.filter-chip.active{font-weight:600}
+/* Source colours */
+.fc-all.active{background:rgba(240,180,41,0.1);border-color:var(--gold);color:var(--gold)}
+.fc-ssy.active{background:rgba(167,139,250,0.1);border-color:var(--ssy);color:var(--ssy)}
+.fc-arrow.active{background:rgba(0,212,170,0.08);border-color:var(--arrow);color:var(--arrow)}
+.fc-ifchor.active{background:rgba(74,158,255,0.08);border-color:var(--ifchor);color:var(--ifchor)}
+.fc-marketed.active{background:rgba(240,180,41,0.08);border-color:var(--marketed);color:var(--marketed)}
+.fc-combo.active{background:linear-gradient(90deg,rgba(0,212,170,0.1),rgba(74,158,255,0.1),rgba(240,180,41,0.1));border-color:var(--teal);color:var(--teal)}
+/* ETA colours */
+.fc-eta7.active{background:rgba(255,71,87,0.1);border-color:var(--red);color:var(--red)}
+.fc-eta14.active{background:rgba(255,107,53,0.1);border-color:var(--orange);color:var(--orange)}
+.fc-eta21.active{background:rgba(0,212,170,0.08);border-color:var(--teal);color:var(--teal)}
+.fc-eta28.active{background:rgba(139,149,165,0.1);border-color:var(--text3);color:var(--text2)}
+/* Size colours */
+.fc-cape.active{background:rgba(74,158,255,0.08);border-color:var(--blue);color:var(--blue)}
+.fc-nmax.active{background:rgba(167,139,250,0.08);border-color:var(--purple);color:var(--purple)}
+.fc-vloc.active{background:rgba(240,180,41,0.08);border-color:var(--gold);color:var(--gold)}
+
+/* Compact inline slider — lives inside the single filter row after ETA tiles */
+.inline-slider-wrap{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-radius:3px;padding:2px 8px;margin:0 4px}
+.date-range-val{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);white-space:nowrap;min-width:42px;text-align:center}
+input[type=range].slider{-webkit-appearance:none;appearance:none;width:70px;height:3px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer}
+input[type=range].slider::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--gold);cursor:pointer}
+.range-reset{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);cursor:pointer;padding:1px 4px;border-radius:2px;transition:all 0.12s;border:1px solid transparent}
+.range-reset:hover{color:var(--red);border-color:var(--red)}
+
+.search-box{background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:4px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);outline:none;width:150px;transition:border-color 0.15s}
+.search-box:focus{border-color:var(--gold)}
+.search-box::placeholder{color:var(--text3)}
+
+/* MAIN TABLE */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.table-wrap{flex:1;overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:1300px}
+thead tr{background:var(--bg3);position:sticky;top:0;z-index:50}
+th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.2px;color:var(--text3);text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border2);white-space:nowrap;cursor:pointer;user-select:none;transition:color 0.1s}
+th:hover{color:var(--text2)}
+th.sorted{color:var(--gold)}
+th .sort-arrow{margin-left:3px;opacity:0.5;font-size:9px}
+th.sorted .sort-arrow{opacity:1;color:var(--gold)}
+th.no-sort{cursor:default}
+th.no-sort:hover{color:var(--text3)}
+tbody tr{border-bottom:1px solid rgba(28,34,48,0.6);transition:background 0.1s}
+tbody tr:hover{background:rgba(255,255,255,0.018)}
+td{padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap;vertical-align:middle}
+td.vessel-name{color:var(--text);font-weight:500;font-size:12px;min-width:150px}
+td.eta-ph{font-weight:600}
+td.dwt-col{color:var(--text)}
+
+/* ETA urgency */
+tr.eta-urgent td.eta-ph{color:var(--red)!important}
+tr.eta-soon td.eta-ph{color:var(--orange)!important}
+tr.eta-ok td.eta-ph{color:var(--teal)!important}
+tr.eta-far td.eta-ph{color:var(--text3)!important}
+tr.eta-manual td.eta-ph{color:var(--purple)!important}
+
+/* Merged row */
+tr.merged-row{background:rgba(240,180,41,0.025)!important}
+tr.merged-row td.vessel-name{color:var(--gold)!important}
+
+/* Manual row */
+tr.manual-row td.vessel-name{color:var(--blue)!important}
+tr.manual-row{background:rgba(74,158,255,0.025)!important}
+
+/* Badges */
+.src-badge{display:inline-flex;align-items:center;padding:1px 6px;border-radius:2px;font-size:9px;font-weight:600;letter-spacing:0.5px;margin-right:2px}
+.src-ssy{background:rgba(167,139,250,0.12);color:var(--ssy);border:1px solid rgba(167,139,250,0.25)}
+.src-arrow{background:rgba(0,212,170,0.1);color:var(--arrow);border:1px solid rgba(0,212,170,0.2)}
+.src-ifchor{background:rgba(74,158,255,0.1);color:var(--ifchor);border:1px solid rgba(74,158,255,0.2)}
+.src-manual{background:rgba(74,158,255,0.1);color:var(--blue);border:1px solid rgba(74,158,255,0.2)}
+.mkt-badge{display:inline-flex;padding:1px 6px;border-radius:2px;font-size:9px;font-weight:600;background:rgba(240,180,41,0.1);color:var(--gold);border:1px solid rgba(240,180,41,0.25)}
+.mkt-none{color:var(--text3);font-size:10px}
+
+/* ETA override */
+.eta-override-wrap{position:relative;display:inline-flex;align-items:center;gap:4px}
+.eta-display{cursor:pointer;padding:1px 3px;border-radius:2px;transition:background 0.1s}
+.eta-display:hover{background:rgba(240,180,41,0.1)}
+.eta-edit-input{background:var(--bg3);border:1px solid var(--gold);color:var(--gold);font-family:'IBM Plex Mono',monospace;font-size:11px;width:80px;padding:2px 5px;border-radius:3px;outline:none;display:none}
+.eta-override-dot{width:5px;height:5px;border-radius:50%;background:var(--purple);display:none;title:'Manual override'}
+
+/* Editable inputs */
+.comment-input{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;width:130px;padding:2px 4px;outline:none;transition:border-color 0.15s}
+.comment-input:focus{border-bottom-color:var(--gold);color:var(--text)}
+.comment-input::placeholder{color:var(--text3)}
+.offer-input{background:transparent;border:none;border-bottom:1px solid rgba(240,180,41,0.25);color:var(--gold);font-family:'IBM Plex Mono',monospace;font-size:10px;width:80px;padding:2px 4px;outline:none;transition:border-color 0.15s}
+.offer-input:focus{border-bottom-color:var(--gold);background:rgba(240,180,41,0.04)}
+.offer-input::placeholder{color:rgba(240,180,41,0.3);font-size:9px}
+.del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;border-radius:2px;transition:all 0.15s;line-height:1}
+.del-btn:hover{background:rgba(255,71,87,0.15);color:var(--red)}
+
+/* Empty state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px}
+.empty-icon{font-size:36px;opacity:0.3}
+
+/* FOOTER */
+.footer{background:var(--bg2);border-top:1px solid var(--border);padding:7px 16px;display:flex;align-items:center;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3)}
+.footer-note{display:flex;gap:14px;flex-wrap:wrap}
+.legend-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
+
+/* Scrubber */
+.scrubber-y{color:var(--teal);font-size:9px;font-weight:600}
+.scrubber-n{color:var(--text3);font-size:9px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:20px;width:580px;max-height:85vh;overflow:auto}
+.modal-lg{width:700px}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold);margin-bottom:14px}
+.modal-textarea{width:100%;height:280px;background:var(--bg);border:1px solid var(--border2);color:var(--teal);font-family:'IBM Plex Mono',monospace;font-size:10px;padding:10px;border-radius:4px;resize:none;outline:none}
+.modal-close{margin-top:10px;padding:7px 16px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;border-radius:3px}
+.modal-close:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Add Row Form */
+.add-row-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+.form-input{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 8px;border-radius:3px;outline:none;transition:border-color 0.15s}
+.form-input:focus{border-color:var(--gold)}
+
+/* Publish panel */
+.publish-panel{background:rgba(240,180,41,0.04);border:1px solid rgba(240,180,41,0.2);border-radius:4px;padding:10px;margin-top:8px}
+.publish-status{font-family:'IBM Plex Mono',monospace;font-size:10px;margin-top:6px;padding:5px 8px;border-radius:3px;display:none}
+.publish-status.ok{background:rgba(0,212,170,0.08);color:var(--teal);border:1px solid rgba(0,212,170,0.2);display:block}
+.publish-status.err{background:rgba(255,71,87,0.08);color:var(--red);border:1px solid rgba(255,71,87,0.2);display:block}
+.publish-status.loading{background:rgba(240,180,41,0.05);color:var(--gold);border:1px solid rgba(240,180,41,0.2);display:block}
+
+/* View-only banner */
+.view-banner{background:rgba(74,158,255,0.08);border-bottom:1px solid rgba(74,158,255,0.2);padding:6px 16px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--blue);display:none;align-items:center;justify-content:space-between}
+.view-banner.show{display:flex}
+</style>
+</head>
+<body>
+
+<!-- VIEW-ONLY BANNER (shown to colleagues) -->
+<div class="view-banner" id="viewBanner">
+  <span>👁 VIEW MODE — You are viewing a shared tonnage list. Use the link to view the latest published data.</span>
+  <button class="action-btn" style="border-color:var(--blue);color:var(--blue);font-size:9px" onclick="loadSharedView()">↻ REFRESH</button>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="logo">
+    ⬡ TONNAGE PARSER
+    <div class="logo-sub">WESTERN AUSTRALIA<br>TONNAGE SUPPLY</div>
+  </div>
+  <div class="hdr-stats">
+    <div class="stat-pill"><span style="color:var(--ssy)">■</span> SSY <span class="stat-val stat-ssy" id="cnt-ssy">0</span></div>
+    <div class="stat-pill"><span style="color:var(--arrow)">■</span> ARROW <span class="stat-val stat-arrow" id="cnt-arrow">0</span></div>
+    <div class="stat-pill"><span style="color:var(--ifchor)">■</span> IFCHOR <span class="stat-val stat-ifchor" id="cnt-ifchor">0</span></div>
+    <div class="stat-pill" style="border-color:var(--gold)"><span class="stat-val stat-total" id="cnt-total">0</span> <span style="color:var(--text3)">VESSELS</span></div>
+    <div class="stat-pill"><span style="color:var(--marketed)">★</span> <span class="stat-val" style="color:var(--marketed)" id="cnt-marketed">0</span></div>
+    <div class="stat-pill" title="Vessels confirmed by 2 or more broker sources — merged into one row"><span style="color:var(--gold)">●</span> MULTI-SOURCE <span class="stat-val" style="color:var(--gold)" id="cnt-dupes">0</span></div>
+    <div class="stat-pill" id="publishedBadge" style="display:none;border-color:var(--teal)">
+      <span style="color:var(--teal)">✓ PUBLISHED</span> <span style="color:var(--text3)" id="publishedTime"></span>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout" id="mainLayout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+
+    <!-- SSY -->
+    <div class="sidebar-section">
+      <div class="sec-label"><span style="color:var(--ssy)">■ SSY</span><span style="color:var(--text3);font-size:9px">AIS-BASED</span></div>
+      <textarea class="paste-box" id="paste-ssy" placeholder="Paste SSY list...&#10;Vessel|DWT|Blt|Draft|Scrub|Owner|Port|OpenDate|AIS|ETA WA|Comment|Status"></textarea>
+      <button class="parse-btn ssy" onclick="parseSource('ssy')">⚡ PARSE SSY</button>
+      <div class="parse-result" id="res-ssy"></div>
+    </div>
+
+    <!-- ARROW -->
+    <div class="sidebar-section">
+      <div class="sec-label"><span style="color:var(--arrow)">■ ARROW</span></div>
+      <textarea class="paste-box" id="paste-arrow" placeholder="Paste Arrow list...&#10;VESSEL|DWT|BLT|IMO|NWAUS|OPEN PORT|DATE|OWNER"></textarea>
+      <button class="parse-btn arrow" onclick="parseSource('arrow')">⚡ PARSE ARROW</button>
+      <div class="parse-result" id="res-arrow"></div>
+    </div>
+
+    <!-- IFCHOR -->
+    <div class="sidebar-section">
+      <div class="sec-label"><span style="color:var(--ifchor)">■ IFCHOR</span></div>
+      <textarea class="paste-box" id="paste-ifchor" placeholder="Paste Ifchor list...&#10;SHIP NAME|DWT|DFT|BLT|DELIVERY|DELY FROM|DELY TO|OWNER&#10;&#10;ETA PH auto-calculated from port lookup table"></textarea>
+      <button class="parse-btn ifchor" onclick="parseSource('ifchor')">⚡ PARSE IFCHOR</button>
+      <div class="parse-result" id="res-ifchor"></div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="sidebar-section" style="border-bottom:none">
+      <div class="sec-label">ACTIONS</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;gap:6px">
+          <button class="action-btn btn-export" style="flex:1;padding:7px" onclick="exportCSV()">⬇ CSV</button>
+          <button class="action-btn" style="flex:1;padding:7px;background:rgba(240,180,41,0.08);color:var(--gold);border:1px solid var(--gold)" onclick="exportText()">📋 TEXT</button>
+          <button class="action-btn btn-add-row" style="flex:1;padding:7px" onclick="openAddRow()">+ ROW</button>
+        </div>
+        <button class="action-btn btn-clear" style="width:100%;padding:7px" onclick="clearAll()">✕ CLEAR ALL</button>
+      </div>
+
+      <!-- PUBLISH PANEL -->
+      <div class="publish-panel">
+        <div class="sec-label" style="margin-bottom:6px">PUBLISH & SHARE</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);line-height:1.7;margin-bottom:8px">
+          Click Publish to save current list to a shared link your colleagues can view. Share the URL — they see a read-only live view.
+        </div>
+        <button class="action-btn btn-publish" onclick="publishList()">🚀 PUBLISH TONNAGE LIST</button>
+        <div class="publish-status" id="publishStatus"></div>
+        <div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)">
+          SHARE URL:<br>
+          <span id="shareUrlDisplay" style="color:var(--blue);word-break:break-all;cursor:pointer" onclick="copyShareUrl()" title="Click to copy">—</span>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);line-height:1.8">
+        LAST UPDATED: <span id="lastUpdate" style="color:var(--text2)">—</span><br>
+        <span style="color:var(--gold)">●</span> = 2+ sources confirmed (merged row)<br>
+        <span style="color:var(--purple)">●</span> = ETA manually overridden<br>
+        <span style="color:var(--blue)">●</span> = Manually added row<br>
+        <span style="color:var(--marketed)">★</span> = SSY "Given" (marketed)
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN TABLE -->
+  <div class="main">
+
+    <!-- FILTER BAR — single row -->
+    <div class="filter-wrap">
+      <div class="filter-row">
+        <span class="filter-label">SOURCE:</span>
+        <span class="filter-chip fc-all active" data-ftype="source" data-fval="all" onclick="toggleChip(this)">ALL</span>
+        <span class="filter-chip fc-ssy" data-ftype="source" data-fval="ssy" onclick="toggleChip(this)">SSY</span>
+        <span class="filter-chip fc-arrow" data-ftype="source" data-fval="arrow" onclick="toggleChip(this)">ARROW</span>
+        <span class="filter-chip fc-ifchor" data-ftype="source" data-fval="ifchor" onclick="toggleChip(this)">IFCHOR</span>
+        <span class="filter-chip fc-combo" data-ftype="source" data-fval="combo" onclick="toggleChip(this)" title="Shows: Ifchor + Arrow + SSY Marketed (Given) only">IFCHOR + ARROW + SSY★</span>
+
+        <span class="filter-label" style="margin-left:8px">MARKETED:</span>
+        <span class="filter-chip fc-marketed" data-ftype="marketed" data-fval="yes" onclick="toggleChip(this)">★ MARKETED ONLY</span>
+
+        <span class="filter-label" style="margin-left:8px">ETA PH:</span>
+        <span class="filter-chip fc-all active" data-ftype="eta" data-fval="all" onclick="toggleChip(this)">ALL</span>
+        <span class="filter-chip fc-eta7" data-ftype="eta" data-fval="7" onclick="toggleChip(this)">0–7D</span>
+        <span class="filter-chip fc-eta14" data-ftype="eta" data-fval="14" onclick="toggleChip(this)">8–14D</span>
+        <span class="filter-chip fc-eta21" data-ftype="eta" data-fval="21" onclick="toggleChip(this)">15–21D</span>
+        <span class="filter-chip fc-eta28" data-ftype="eta" data-fval="28" onclick="toggleChip(this)">22–28D</span>
+
+        <!-- Inline date range slider — compact, lives right after ETA tiles -->
+        <div class="inline-slider-wrap">
+          <span class="date-range-val" id="sliderFromLabel">—</span>
+          <input type="range" class="slider" id="sliderFrom" min="0" max="60" value="0" oninput="onSliderChange()">
+          <input type="range" class="slider" id="sliderTo" min="0" max="60" value="60" oninput="onSliderChange()">
+          <span class="date-range-val" id="sliderToLabel">—</span>
+          <span class="range-reset" onclick="resetSlider()">✕</span>
+        </div>
+
+        <span class="filter-label" style="margin-left:8px">SIZE:</span>
+        <span class="filter-chip fc-all active" data-ftype="size" data-fval="all" onclick="toggleChip(this)">ALL</span>
+        <span class="filter-chip fc-cape" data-ftype="size" data-fval="cape" onclick="toggleChip(this)">CAPE 160–190K</span>
+        <span class="filter-chip fc-nmax" data-ftype="size" data-fval="nmax" onclick="toggleChip(this)">NMAX 190–220K</span>
+        <span class="filter-chip fc-vloc" data-ftype="size" data-fval="vloc" onclick="toggleChip(this)">VLOC 220K+</span>
+
+        <input class="search-box" id="searchBox" placeholder="Search vessel / owner..." oninput="renderTable()" style="margin-left:auto">
+        <button class="action-btn btn-export" onclick="exportCSV()" style="margin-left:4px">⬇ EXPORT</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th onclick="sortBy('etaPH')" id="th-etaPH">ETA PH <span class="sort-arrow">▼</span></th>
+            <th onclick="sortBy('name')" id="th-name">VESSEL NAME <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('dwt')" id="th-dwt">DWT <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('age')" id="th-age">BLT <span class="sort-arrow">↕</span></th>
+            <th class="no-sort">DRAFT</th>
+            <th class="no-sort">SCRUB</th>
+            <th onclick="sortBy('openPort')" id="th-openPort">OPEN PORT <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('openDate')" id="th-openDate">OPEN DATE <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('owner')" id="th-owner">OWNER <span class="sort-arrow">↕</span></th>
+            <th class="no-sort">SOURCE</th>
+            <th class="no-sort">MKT</th>
+            <th class="no-sort">OFFER ($/T)</th>
+            <th class="no-sort">COMMENTS</th>
+            <th class="no-sort"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="14"><div class="empty-state"><div class="empty-icon">⚓</div><div>PASTE TONNAGE LISTS FROM THE LEFT PANEL</div><div style="color:var(--text3);font-size:10px">SSY · ARROW · IFCHOR · OR ADD ROW MANUALLY</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="footer-note">
+        <span><span class="legend-dot" style="background:var(--red)"></span>&lt;7d</span>
+        <span><span class="legend-dot" style="background:var(--orange)"></span>8–14d</span>
+        <span><span class="legend-dot" style="background:var(--teal)"></span>15–21d</span>
+        <span><span class="legend-dot" style="background:var(--text3)"></span>22+d</span>
+        <span><span style="color:var(--gold)">●</span> Confirmed 2+ sources</span>
+        <span><span style="color:var(--purple)">●</span> ETA overridden</span>
+        <span><span style="color:var(--blue)">+</span> Manual entry</span>
+        <span style="font-size:9px;color:var(--text3)">Click ETA to override · Click any chip to multi-select</span>
+      </div>
+      <div id="footerRight" style="color:var(--text3)">No data loaded</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD ROW MODAL -->
+<div class="modal-overlay" id="addRowModal">
+  <div class="modal">
+    <div class="modal-title">+ ADD VESSEL MANUALLY</div>
+    <div class="add-row-form" id="addRowForm">
+      <div class="form-group" style="grid-column:1/-1">
+        <div class="form-label">Vessel Name *</div>
+        <input class="form-input" id="ar-name" placeholder="e.g. CAPE PIONEER">
+      </div>
+      <div class="form-group">
+        <div class="form-label">ETA Port Hedland *</div>
+        <input class="form-input" id="ar-eta" placeholder="e.g. 25 Mar or 25/03/2026">
+      </div>
+      <div class="form-group">
+        <div class="form-label">DWT</div>
+        <input class="form-input" id="ar-dwt" placeholder="e.g. 180000">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Built Year</div>
+        <input class="form-input" id="ar-age" placeholder="e.g. 2015 or 15">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Draft (m)</div>
+        <input class="form-input" id="ar-draft" placeholder="e.g. 18.2">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Scrubber</div>
+        <select class="form-input" id="ar-scrubber">
+          <option value="?">Unknown</option>
+          <option value="Y">Yes</option>
+          <option value="N">No</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Open Port</div>
+        <input class="form-input" id="ar-port" placeholder="e.g. Caofeidian">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Open Date</div>
+        <input class="form-input" id="ar-opendate" placeholder="e.g. 12 Mar">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Owner</div>
+        <input class="form-input" id="ar-owner" placeholder="e.g. Cargill">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Offer ($/T)</div>
+        <input class="form-input" id="ar-offer" placeholder="e.g. 9.85">
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <div class="form-label">Comments</div>
+        <input class="form-input" id="ar-comment" placeholder="Any notes...">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="action-btn btn-add-row" style="padding:8px 20px;font-size:11px" onclick="submitAddRow()">+ ADD TO LIST</button>
+      <button class="modal-close" onclick="document.getElementById('addRowModal').classList.remove('open')">CANCEL</button>
+    </div>
+    <div class="parse-result" id="res-addrow" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- EXPORT TEXT MODAL -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal modal-lg">
+    <div class="modal-title">EXPORT — MASTER TONNAGE LIST</div>
+    <textarea class="modal-textarea" id="exportTextArea" readonly></textarea>
+    <button class="modal-close" onclick="document.getElementById('exportModal').classList.remove('open')">CLOSE</button>
+  </div>
+</div>
+
+<!-- PUBLISH SHARE MODAL -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal">
+    <div class="modal-title">✓ PUBLISHED SUCCESSFULLY</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);line-height:1.8;margin-bottom:14px">
+      Your tonnage list has been published. Share this link with colleagues — they will see a live read-only view.
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal);word-break:break-all" id="shareUrlModal"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="action-btn btn-export" style="padding:8px 16px" onclick="copyShareUrl()">📋 COPY LINK</button>
+      <button class="modal-close" onclick="document.getElementById('shareModal').classList.remove('open')">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let vessels = [];
+let sortCol = 'etaPH', sortDir = 'asc';
+let idCounter = 0;
+
+// Multi-select filter state — each key is an array of active values
+// Special: 'all' means no filter; individual values are added/removed
+let activeFilters = {
+  source: ['all'],   // 'all','ssy','arrow','ifchor'
+  eta:    ['all'],   // 'all','7','14','21','28'
+  size:   ['all'],   // 'all','cape','nmax','vloc'
+  marketed: []       // 'yes' or empty
+};
+// Date slider state (days from today)
+let sliderFrom = 0, sliderTo = 60;
+
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_MAP = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+
+// Shared storage key for publishing
+const STORAGE_KEY = 'cape_desk_tonnage_v1';
+
+// ============================================================
+// PORT → DAYS TABLE (full lookup, case-insensitive)
+// ============================================================
+const PORT_DAYS = {
+  bayuquan:14,beilun:12,boryeong:13,boryoung:13,boryung:13,busan:13,
+  campha:8,'cam pha':8,caofedian:13,caofeidian:13,cfd:13,chiba:12,
+  changzhou:13,cigading:4,cjk:12,'cjk (changjiangkou)':12,dalian:13,
+  dangjin:13,dandong:13,dongjiakou:12,fangcheng:11,fuzhou:11,fujian:11,
+  goseong:13,guangzhou:11,gwangyang:14,hadong:13,'hong kong':11,
+  huanghua:14,inchon:13,jeju:14,japan:13,jiangyin:13,jingtang:14,
+  kakogawa:13,kaohsiung:11,kashima:13,kemen:11,krishnapatnam:12,
+  kwangyang:14,lanqiao:13,lanshan:13,lianyungang:13,liuheng:12,
+  'liuheng dao':12,'liuheng island':12,longkou:13,luoyu:12,mailiao:11,
+  majishan:12,mizushima:13,nagoya:13,ningbo:12,'north china':13,
+  philippines:7,pohang:14,putian:11,qingdao:12,qinhuangdao:13,
+  qinghuangdao:13,rizhao:12,rugao:13,shanhaiguan:13,shidao:11,
+  shulanghu:12,singapore:7,skorea:13,'s.korea':13,'south korea':14,
+  'son duong':8,'dung quat':8,taean:14,taicang:13,taiwan:11,tianjin:14,
+  tobata:13,ulsan:13,weihai:12,xiamen:11,xingang:14,'xingang (tianjin)':14,
+  xinsha:11,yantai:13,yawata:13,yeosu:14,yosu:14,youngheung:14,
+  zhangjiagang:12,zhanjiang:11,zhenjiang:13,zhoushan:12,zhuhai:11,
+  china:12,'china north':13,fukuyama:13,oita:13,muroran:13,
+  'nghi son':9,vietnam:9,indonesia:5,malaysia:9,
+};
+
+function getPortDays(port) {
+  if(!port) return 12;
+  const p = port.toLowerCase().trim();
+  // Direct match
+  if(PORT_DAYS[p] !== undefined) return PORT_DAYS[p];
+  // Partial match — find any key that is contained in the port string
+  for(const [key, days] of Object.entries(PORT_DAYS)) {
+    if(p.includes(key) || key.includes(p)) return days;
+  }
+  // Regional fallback
+  if(p.includes('singapore') || p.includes('sgp')) return 7;
+  if(p.includes('japan')) return 13;
+  if(p.includes('korea') || p.includes('korean')) return 13;
+  if(p.includes('vietnam') || p.includes('viet')) return 9;
+  if(p.includes('indonesia')) return 5;
+  if(p.includes('malaysia') || p.includes('malay')) return 9;
+  if(p.includes('china') || p.includes('chinese')) return 12;
+  return 12; // ultimate default
+}
+
+// ============================================================
+// DATE UTILITIES
+// ============================================================
+function parseDate(str) {
+  if(!str) return null;
+  str = str.trim();
+  let m;
+  // DD/MM/YYYY or DD-MM-YYYY
+  m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(m){const y=m[3].length===2?2000+parseInt(m[3]):parseInt(m[3]);return new Date(y,parseInt(m[2])-1,parseInt(m[1]))}
+  // YYYY-MM-DD
+  m = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(m) return new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3]));
+  // "23 Feb" or "23 Feb 26"
+  m = str.match(/^(\d{1,2})\s+([A-Za-z]{3})(?:\s+(\d{2,4}))?$/);
+  if(m){const mo=MONTH_MAP[m[2].toLowerCase()];if(mo!==undefined){let y;if(m[3]){y=parseInt(m[3])<100?2000+parseInt(m[3]):parseInt(m[3])}else{const now=new Date();y=now.getFullYear();if(mo<now.getMonth()-2)y+=1}return new Date(y,mo,parseInt(m[1]))}}
+  // 18Mar26 or 18-20Mar26 (take first)
+  m = str.match(/(\d{1,2})(?:\-\d{1,2})?([A-Za-z]{3})(\d{2,4})/);
+  if(m){const y=parseInt(m[3])<100?2000+parseInt(m[3]):parseInt(m[3]);const mo=MONTH_MAP[m[2].toLowerCase()];if(mo!==undefined)return new Date(y,mo,parseInt(m[1]))}
+  return null;
+}
+
+function fmtDate(d){
+  if(!d) return '—';
+  return d.getDate()+' '+MONTHS[d.getMonth()];
+}
+
+function fmtDateFull(d){
+  if(!d) return '—';
+  return d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear();
+}
+
+function daysFromToday(d){if(!d)return 999;return Math.round((d-TODAY)/86400000)}
+
+function etaUrgencyClass(v){
+  if(v.etaOverride) return 'eta-manual';
+  const days=daysFromToday(v.etaPH);
+  if(days<=7) return 'eta-urgent';
+  if(days<=14) return 'eta-soon';
+  if(days<=21) return 'eta-ok';
+  return 'eta-far';
+}
+
+function calcEtaPH(deliveryPort, delyTo){
+  if(!delyTo) return null;
+  const base=new Date(delyTo);
+  base.setDate(base.getDate()+getPortDays(deliveryPort));
+  return base;
+}
+
+// ============================================================
+// MULTI-SELECT FILTER LOGIC
+// ============================================================
+function toggleChip(el) {
+  const ftype = el.dataset.ftype;
+  const fval  = el.dataset.fval;
+
+  if(fval === 'all') {
+    // ALL always resets to just 'all'
+    activeFilters[ftype] = ['all'];
+    // Deactivate all chips of this type, activate ALL
+    document.querySelectorAll(`[data-ftype="${ftype}"]`).forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  } else if(fval === 'combo') {
+    // COMBO: exclusive preset — Ifchor + Arrow + SSY★ (marketed)
+    const isActive = activeFilters.source.includes('combo');
+    if(isActive) {
+      // Toggle off → back to ALL
+      activeFilters.source = ['all'];
+      document.querySelectorAll('[data-ftype="source"]').forEach(c => c.classList.remove('active'));
+      document.querySelector('[data-ftype="source"][data-fval="all"]').classList.add('active');
+    } else {
+      activeFilters.source = ['combo'];
+      document.querySelectorAll('[data-ftype="source"]').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+    }
+  } else if(ftype === 'marketed') {
+    // Toggle boolean
+    const idx = activeFilters.marketed.indexOf('yes');
+    if(idx >= 0) { activeFilters.marketed = []; el.classList.remove('active'); }
+    else { activeFilters.marketed = ['yes']; el.classList.add('active'); }
+  } else {
+    // Multi-select: remove 'all', toggle this value
+    const arr = activeFilters[ftype].filter(x => x !== 'all');
+    const idx = arr.indexOf(fval);
+    if(idx >= 0) arr.splice(idx, 1);
+    else arr.push(fval);
+
+    if(arr.length === 0) {
+      // Nothing selected → back to ALL
+      activeFilters[ftype] = ['all'];
+      document.querySelectorAll(`[data-ftype="${ftype}"]`).forEach(c => c.classList.remove('active'));
+      document.querySelector(`[data-ftype="${ftype}"][data-fval="all"]`).classList.add('active');
+    } else {
+      activeFilters[ftype] = arr;
+      // Deactivate ALL chip
+      const allChip = document.querySelector(`[data-ftype="${ftype}"][data-fval="all"]`);
+      if(allChip) allChip.classList.remove('active');
+      el.classList.toggle('active', arr.includes(fval));
+    }
+  }
+  renderTable();
+}
+
+// ============================================================
+// DATE RANGE SLIDER
+// ============================================================
+function initSlider(){
+  updateSliderLabels();
+}
+
+function onSliderChange(){
+  let f=parseInt(document.getElementById('sliderFrom').value);
+  let t=parseInt(document.getElementById('sliderTo').value);
+  if(f>t){document.getElementById('sliderFrom').value=t;f=t}
+  sliderFrom=f; sliderTo=t;
+  updateSliderLabels();
+  renderTable();
+}
+
+function updateSliderLabels(){
+  const f=parseInt(document.getElementById('sliderFrom').value);
+  const t=parseInt(document.getElementById('sliderTo').value);
+  const d1=new Date(TODAY); d1.setDate(d1.getDate()+f);
+  const d2=new Date(TODAY); d2.setDate(d2.getDate()+t);
+  document.getElementById('sliderFromLabel').textContent=fmtDate(d1);
+  document.getElementById('sliderToLabel').textContent=t>=60?'60+d':fmtDate(d2);
+  sliderFrom=f; sliderTo=t;
+}
+
+function resetSlider(){
+  document.getElementById('sliderFrom').value=0;
+  document.getElementById('sliderTo').value=60;
+  sliderFrom=0; sliderTo=60;
+  updateSliderLabels();
+  renderTable();
+}
+
+// ============================================================
+// MERGE DUPLICATES — ETA priority: Arrow > Ifchor > SSY
+// ============================================================
+function mergeDuplicates(){
+  const groups={};
+  vessels.forEach(v=>{
+    if(v.deleted) return;
+    const key=v.name.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(!groups[key]) groups[key]=[];
+    groups[key].push(v);
+  });
+
+  // Reset all
+  vessels.forEach(v=>{v.isDuplicate=false;v.isMergedSecondary=false;v.mergedSources=null;});
+
+  Object.values(groups).forEach(grp=>{
+    if(grp.length<=1){return;}
+
+    // ETA priority: Arrow (most trusted) > Ifchor > SSY
+    const etaPriority={arrow:0,ifchor:1,ssy:2,manual:3};
+    // Data richness priority: SSY > Arrow > Ifchor (SSY has most columns)
+    const dataPriority={ssy:0,arrow:1,ifchor:2,manual:3};
+
+    grp.sort((a,b)=>dataPriority[a.source]-dataPriority[b.source]);
+    const primary=grp[0];
+    const sources=[...new Set(grp.map(v=>v.source))];
+    primary.isDuplicate=true;
+    primary.mergedSources=sources;
+
+    // Pick best ETA (from highest priority source that has one)
+    // But if user has manually overridden, respect that
+    if(!primary.etaOverride){
+      const etaSource=grp
+        .filter(v=>v.etaPH)
+        .sort((a,b)=>etaPriority[a.source]-etaPriority[b.source])[0];
+      if(etaSource) primary.etaPH=etaSource.etaPH;
+    }
+
+    // Fill missing fields from secondaries
+    grp.slice(1).forEach(sec=>{
+      if(!primary.draft&&sec.draft) primary.draft=sec.draft;
+      if(!primary.openDate&&sec.openDate) primary.openDate=sec.openDate;
+      if(!primary.openPort&&sec.openPort) primary.openPort=sec.openPort;
+      if(!primary.owner&&sec.owner) primary.owner=sec.owner;
+      if(primary.scrubber==='?'&&sec.scrubber!=='?') primary.scrubber=sec.scrubber;
+      sec.isDuplicate=true; sec.isMergedSecondary=true;
+    });
+  });
+}
+
+// ============================================================
+// PARSERS
+// ============================================================
+function parseSSY(text){
+  // Auto-detect and normalise Gmail vertical format
+  if(detectGmailFormat(text, SSY_HEADERS)) {
+    text = normaliseGmailFormat(text, SSY_HEADERS);
+  }
+  const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);
+  const parsed=[];
+  for(const line of lines){
+    if(/^vessel\b/i.test(line)||/^-{3,}/.test(line)||/^ship\s*name/i.test(line)) continue;
+    let cols=line.split('\t').map(c=>c.trim());
+    if(cols.length<5) cols=line.split(/\s{2,}/).map(c=>c.trim()).filter(c=>c);
+    if(cols.length<3) continue;
+    const rawDwt=parseInt((cols[1]||'').replace(/[,\s]/g,''));
+    const dwt=isNaN(rawDwt)?null:(rawDwt<1000?rawDwt*1000:rawDwt);
+    const rawAge=(cols[2]||'').replace(/[',\s]/g,'');
+    const age=rawAge?parseInt(rawAge):null;
+    const scrubber=(cols[4]||'').trim().toUpperCase()==='Y'?'Y':'N';
+    const v={id:++idCounter,source:'ssy',name:(cols[0]||'').replace(/['"]/g,'').trim(),
+      dwt,age,draft:parseFloat(cols[3])||null,scrubber,owner:(cols[5]||'').trim(),
+      openPort:(cols[6]||'').trim(),openDate:parseDate(cols[7]),aisDest:(cols[8]||'').trim(),
+      etaPH:parseDate(cols[9]),comment:(cols[10]||'').trim(),
+      marketed:((cols[11]||'').trim().toLowerCase()==='given'),
+      userComment:'',offer:'',deleted:false,isDuplicate:false,isMergedSecondary:false,mergedSources:null,etaOverride:false};
+    if(!v.name||v.name.length<2) continue;
+    if(!v.dwt||v.dwt<100000) continue;
+    parsed.push(v);
+  }
+  return parsed;
+}
+
+function parseArrow(text){
+  // Auto-detect and normalise Gmail vertical format
+  if(detectGmailFormat(text, ARROW_HEADERS)) {
+    text = normaliseGmailFormat(text, ARROW_HEADERS);
+  }
+  const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);
+  const parsed=[];
+  for(const line of lines){
+    if(/^vessel\b/i.test(line)||/^-{5,}/.test(line)) continue;
+    let cols=line.split('\t').map(c=>c.trim());
+    if(cols.length<4) cols=line.split(/\s{2,}/).map(c=>c.trim()).filter(c=>c);
+    if(cols.length<5) continue;
+    let nwausIdx=3,openPortIdx=4,dateIdx=5,ownerIdx=6;
+    if(cols.length>=7&&/^\d{7}$/.test((cols[3]||'').replace(/[,\s]/g,''))){nwausIdx=4;openPortIdx=5;dateIdx=6;ownerIdx=7;}
+    const rawDwt=parseInt((cols[1]||'').replace(/[,\s]/g,''));
+    const dwt=isNaN(rawDwt)?null:(rawDwt<1000?rawDwt*1000:rawDwt);
+    const v={id:++idCounter,source:'arrow',name:(cols[0]||'').trim(),dwt,age:parseInt(cols[2])||null,
+      draft:null,scrubber:'?',owner:(cols[ownerIdx]||'').trim(),openPort:(cols[openPortIdx]||'').trim(),
+      openDate:parseDate(cols[dateIdx]),etaPH:parseDate(cols[nwausIdx]),
+      aisDest:'',comment:'',marketed:false,userComment:'',offer:'',
+      deleted:false,isDuplicate:false,isMergedSecondary:false,mergedSources:null,etaOverride:false};
+    if(!v.name||v.name.length<2) continue;
+    if(!v.dwt||v.dwt<100000) continue;
+    parsed.push(v);
+  }
+  return parsed;
+}
+
+// ============================================================
+// FORMAT DETECTOR & NORMALISER
+// Handles two paste formats:
+//   OUTLOOK (normal): one row per vessel, columns tab/space separated
+//   GMAIL:  each field label + value on its own line, vessels separated by blank lines
+//           e.g.  "SHIP NAME\nWen Yuan Star\nDWT\n181429\nDFT\n18.2\n..."
+// ============================================================
+
+// Known column header labels for each broker (lowercase)
+const IFCHOR_HEADERS = ['ship name','dwt','dft','blt','delivery','dely from','dely to','owner'];
+const SSY_HEADERS    = ['vessel','dwt','blt yr','draft','scrubber','owner','open port','open date','ais destination','eta waus','comment','status'];
+const ARROW_HEADERS  = ['vessel','dwt','blt','imo #','nwaus','open','date','owner'];
+
+function detectGmailFormat(text, headers) {
+  // Gmail format: the header labels appear as standalone lines (with or without blank lines between)
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  const lowerLines = lines.map(l => l.toLowerCase());
+  const headerHits = headers.filter(h => lowerLines.includes(h)).length;
+  return headerHits >= 2;
+}
+
+// ---- CORE GMAIL NORMALISER ----
+// Gmail copies HTML tables as a vertical stream where:
+//   - Column headers appear once at the top (each on its own line)
+//   - Then ALL cell values follow sequentially, one per line
+//   - BLANK cells are OMITTED — no empty line placeholder
+//   - Some cells contain multi-word values that look like headers (e.g. "Open Port")
+//   - The stream repeats: H1,H2,...Hn,V1,V2,...Vn,V1,V2,...Vn  (headers once, values repeat)
+//
+// Strategy: 
+//   1. Find the header block (consecutive lines that are all known headers)
+//   2. Everything after = the value stream
+//   3. For each vessel row, greedily assign values to headers
+//      BUT: if a value could be the NEXT header's value not the current one,
+//      use lookahead to detect blanks.
+//   4. We use a "sliding window" approach — for each position in the value stream,
+//      we test whether treating it as the start of a new row produces valid vessel data.
+//
+// For SSY specifically, the 12 columns per vessel are:
+//   Vessel | DWT | Blt Yr | Draft | Scrubber | Owner | Open Port | Open Date | AIS Destination | ETA Waus | Comment | Status
+// Where Scrubber (col 4), Comment (col 10), Status (col 11) are FREQUENTLY blank/omitted.
+// DWT is a small integer (e.g. "208"), Blt Yr is 2-digit (e.g. "17"), Draft is decimal (e.g. "18.5")
+
+function normaliseGmailFormat(text, headers) {
+  // Step 1: split preserving blank lines info, then strip blanks for processing
+  const allLines = text.split('\n').map(l => l.trim());
+  const lines = allLines.filter(l => l.length > 0);
+  const lowerLines = lines.map(l => l.toLowerCase());
+  const headerPattern = headers.map(h => h.toLowerCase());
+  const nCols = headerPattern.length;
+
+  // Step 2: Find where the header block ends.
+  // For Gmail block format: headers appear as consecutive lines at the top.
+  // Strategy: scan from start, find the last line that is a known header label
+  // before we hit a line that is definitely NOT a header (i.e. a data value).
+  let headerEnd = 0;
+  {
+    let i = 0;
+    // Skip to first known header
+    while(i < lines.length && !headerPattern.includes(lowerLines[i])) i++;
+    // Now consume the header block: all consecutive known headers
+    // Allow up to 1 non-header gap (in case there's a stray blank that survived filtering)
+    let gaps = 0;
+    let j = i;
+    const seen = new Set();
+    while(j < lines.length && seen.size < nCols && gaps <= 1) {
+      if(headerPattern.includes(lowerLines[j])) {
+        seen.add(lowerLines[j]);
+        gaps = 0;
+      } else {
+        gaps++;
+      }
+      j++;
+    }
+    // headerEnd = position right after the last header we consumed
+    headerEnd = j;
+  }
+
+  // Step 3: The value stream is everything after the header block
+  const values = lines.slice(headerEnd);
+
+  if(values.length === 0) return text;
+
+  // Step 4: For SSY format, use domain knowledge to split the flat value stream into rows.
+  // We know the structure: vessel_name, dwt(int<1000), blt_yr(2-digit int), draft(decimal),
+  // [scrubber Y/blank], owner, open_port, open_date(DD Mon), ais_dest, eta(DD Mon),
+  // [comment/blank], [status 'Given'/blank]
+  //
+  // DETECTION: A new vessel row starts when we see a string that looks like a vessel name
+  // (not a number, not a date, not 'Y', not a known skip value).
+  // We detect row boundaries by finding positions where:
+  //   - current value is NOT a number AND NOT a short date AND NOT 'Y'/'N'
+  //   - AND the PREVIOUS row's mandatory fields (vessel, dwt, blt, draft) are already filled
+
+  const rows = [];
+
+  if(JSON.stringify(headerPattern) === JSON.stringify(SSY_HEADERS)) {
+    // SSY-specific parser: use value-type fingerprinting
+    // vessel name: text, multiple words ok, NOT a small integer, NOT a date, NOT 'Y'
+    // dwt: integer 170-220 (stored as hundreds)
+    // blt yr: integer 00-26 (2-digit year)  
+    // draft: float 16.0-19.5
+    // scrubber: 'Y' or absent
+    // owner: text (may be '??')
+    // open port: text
+    // open date: "DD Mon" pattern
+    // ais destination: text
+    // eta waus: "DD Mon" pattern
+    // comment: text or absent
+    // status: 'Given' or absent
+
+    const isSmallInt = s => /^\d{1,3}$/.test(s) && parseInt(s) >= 1 && parseInt(s) < 300;
+    const isTwoDigitYear = s => /^\d{2}$/.test(s) && parseInt(s) >= 0 && parseInt(s) <= 30;
+    const isDecimal = s => /^\d{2}\.\d$/.test(s) || /^\d{2}\.\d{1,2}$/.test(s);
+    const isDateStr = s => /^\d{1,2}\s+[A-Za-z]{3}$/.test(s);
+    const isScrubber = s => s.toUpperCase() === 'Y';
+    const isStatus = s => s.toLowerCase() === 'given';
+    const isComment = s => s.length > 0 && !isSmallInt(s) && !isDecimal(s) && !isDateStr(s) && !isScrubber(s) && !isStatus(s) && !/^\d+$/.test(s);
+
+    // Walk through the values and assemble rows greedily
+    let i = 0;
+    while(i < values.length) {
+      const v = values[i];
+      // A vessel name: not a number, not a date, not Y, reasonably long
+      if(!isSmallInt(v) && !isDecimal(v) && !isDateStr(v) && !isScrubber(v) && !isStatus(v) && v.length >= 2) {
+        const row = { vessel: v };
+        i++;
+
+        // DWT — small integer
+        if(i < values.length && isSmallInt(values[i]) && parseInt(values[i]) >= 160 && parseInt(values[i]) < 225) {
+          row['dwt'] = values[i++];
+        } else { rows.push(row); continue; }
+
+        // Blt Yr — 2-digit year
+        if(i < values.length && isTwoDigitYear(values[i])) {
+          row['blt yr'] = values[i++];
+        } else { rows.push(row); continue; }
+
+        // Draft — decimal like 18.2
+        if(i < values.length && isDecimal(values[i])) {
+          row['draft'] = values[i++];
+        } else { rows.push(row); continue; }
+
+        // Scrubber — optional 'Y'
+        if(i < values.length && isScrubber(values[i])) {
+          row['scrubber'] = values[i++];
+        } else {
+          row['scrubber'] = '';
+        }
+
+        // Owner — text (could be '??')
+        if(i < values.length && !isSmallInt(values[i]) && !isDecimal(values[i]) && !isDateStr(values[i])) {
+          row['owner'] = values[i++];
+        } else { rows.push(row); continue; }
+
+        // Open Port — text, not a date
+        if(i < values.length && !isDateStr(values[i]) && !isSmallInt(values[i])) {
+          row['open port'] = values[i++];
+        } else { rows.push(row); continue; }
+
+        // Open Date — "DD Mon"
+        if(i < values.length && isDateStr(values[i])) {
+          row['open date'] = values[i++];
+        } else { rows.push(row); continue; }
+
+        // AIS Destination — text, not a date
+        if(i < values.length && !isDateStr(values[i]) && !isSmallInt(values[i])) {
+          row['ais destination'] = values[i++];
+        } else { rows.push(row); continue; }
+
+        // ETA Waus — "DD Mon"
+        if(i < values.length && isDateStr(values[i])) {
+          row['eta waus'] = values[i++];
+        } else { rows.push(row); continue; }
+
+        // Comment — optional text (not 'Given', not a date, not a number)
+        // Detect: if current value is text AND next value is a DWT-like integer (160-225),
+        // then current value is a comment for this vessel.
+        // If next value looks like a vessel name (text, not int), this is NOT a comment —
+        // it's the start of the next vessel.
+        if(i < values.length && isComment(values[i]) && !isStatus(values[i])) {
+          const nextVal = i + 1 < values.length ? values[i+1] : '';
+          const nextIsDWT = isSmallInt(nextVal) && parseInt(nextVal) >= 160 && parseInt(nextVal) < 225;
+          const nextIsDate = isDateStr(nextVal);
+          // It's a comment if the value after it looks like DWT (next vessel starting)
+          // OR if the value after it is 'Given' (status follows comment)
+          const nextIsStatus = isStatus(nextVal);
+          if(nextIsDWT || nextIsStatus) {
+            row['comment'] = values[i++];
+          } else {
+            row['comment'] = '';
+          }
+        } else {
+          row['comment'] = '';
+        }
+
+        // Status — optional 'Given'
+        if(i < values.length && isStatus(values[i])) {
+          row['status'] = values[i++];
+        } else {
+          row['status'] = '';
+        }
+
+        rows.push(row);
+      } else {
+        i++; // skip unexpected values
+      }
+    }
+
+  } else {
+    // BLOCK parser for Ifchor / Arrow Gmail format:
+    // Structure: H1\nH2\n...Hn\nV1\nV2\n...Vn\nV1\nV2\n...Vn...
+    // Headers appear ONCE at the top; values repeat in groups of nCols.
+    // Since we already stripped the header block above (headerEnd),
+    // the values array is purely data — just slice into chunks of nCols.
+    const nH = headerPattern.length;
+    for(let k = 0; k + nH <= values.length; k += nH) {
+      const row = {};
+      headerPattern.forEach((h, hi) => { row[h] = values[k + hi] || ''; });
+      // Only add row if first field (vessel name) looks non-empty and non-numeric
+      const firstName = row[headerPattern[0]] || '';
+      if(firstName.length >= 2 && !/^\d+$/.test(firstName)) {
+        rows.push(row);
+      }
+    }
+    // Handle leftover partial row (last vessel if values don't divide evenly)
+    const remainder = values.length % nH;
+    if(remainder > 0) {
+      const k = values.length - remainder;
+      const row = {};
+      headerPattern.slice(0, remainder).forEach((h, hi) => { row[h] = values[k + hi] || ''; });
+      const firstName = row[headerPattern[0]] || '';
+      if(firstName.length >= 2 && !/^\d+$/.test(firstName)) rows.push(row);
+    }
+  }
+
+  if(rows.length === 0) return text;
+
+  // Reconstruct as tab-separated lines
+  return rows.map(row =>
+    headerPattern.map(h => (row[h] || '').toString().trim()).join('\t')
+  ).join('\n');
+}
+
+function parseIfchor(text){
+  // Auto-detect and normalise Gmail vertical format
+  if(detectGmailFormat(text, IFCHOR_HEADERS)) {
+    text = normaliseGmailFormat(text, IFCHOR_HEADERS);
+  }
+
+  const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);
+  const parsed=[];
+  for(const line of lines){
+    if(/^ship\s*name\b/i.test(line)||/^-{5,}/.test(line)) continue;
+    let cols=line.split('\t').map(c=>c.trim());
+    if(cols.length<4) cols=line.split(/\s{2,}/).map(c=>c.trim()).filter(c=>c);
+    if(cols.length<5) continue;
+    const delyTo=parseDate(cols[6]);
+    const deliveryPort=(cols[4]||'').trim();
+    const etaPH=calcEtaPH(deliveryPort,delyTo);
+    const rawDwt=parseInt((cols[1]||'').replace(/[,\s]/g,''));
+    const dwt=isNaN(rawDwt)?null:(rawDwt<1000?rawDwt*1000:rawDwt);
+    const v={id:++idCounter,source:'ifchor',name:(cols[0]||'').trim(),dwt,
+      draft:parseFloat(cols[2])||null,age:parseInt((cols[3]||'').replace(/'/g,''))||null,
+      openPort:deliveryPort,openDate:parseDate(cols[5]),etaPH,
+      owner:(cols[7]||'').trim(),scrubber:'?',aisDest:'',comment:'',marketed:false,
+      userComment:'',offer:'',deleted:false,isDuplicate:false,isMergedSecondary:false,mergedSources:null,etaOverride:false};
+    if(!v.name||v.name.length<2) continue;
+    if(!v.dwt||v.dwt<100000) continue;
+    parsed.push(v);
+  }
+  return parsed;
+}
+
+// ============================================================
+// PARSE SOURCE — preserve comments/offers, update ETAs
+// ============================================================
+function parseSource(src){
+  const text=document.getElementById('paste-'+src).value.trim();
+  if(!text){showResult(src,'err','No text pasted.');return;}
+
+  let parsed=[];
+  let fmtNote='';
+  try{
+    if(src==='ssy'){
+      fmtNote = detectGmailFormat(text, SSY_HEADERS) ? ' [Gmail format detected]' : '';
+      parsed=parseSSY(text);
+    } else if(src==='arrow'){
+      fmtNote = detectGmailFormat(text, ARROW_HEADERS) ? ' [Gmail format detected]' : '';
+      parsed=parseArrow(text);
+    } else if(src==='ifchor'){
+      fmtNote = detectGmailFormat(text, IFCHOR_HEADERS) ? ' [Gmail format detected]' : '';
+      parsed=parseIfchor(text);
+    }
+  }catch(e){showResult(src,'err','Parse error: '+e.message);return;}
+  if(parsed.length===0){showResult(src,'err','No vessels found. Check format — try copying from Outlook instead of Gmail if issue persists.');return;}
+
+  // Save all user data keyed by normalised name
+  const preserved={};
+  vessels.forEach(v=>{
+    const key=v.name.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(!preserved[key]) preserved[key]={userComment:'',offer:'',etaOverride:false,etaPH:null};
+    if(v.userComment) preserved[key].userComment=v.userComment;
+    if(v.offer) preserved[key].offer=v.offer;
+    if(v.etaOverride){preserved[key].etaOverride=true;preserved[key].etaPH=v.etaPH;}
+  });
+
+  // Remove old entries from this source
+  vessels=vessels.filter(v=>v.source!==src);
+
+  // Inject preserved user data, update ETA in existing records from other sources
+  parsed.forEach(newV=>{
+    const key=newV.name.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(preserved[key]){
+      newV.userComment=preserved[key].userComment;
+      newV.offer=preserved[key].offer;
+      // Respect manual ETA override
+      if(preserved[key].etaOverride){newV.etaOverride=true;newV.etaPH=preserved[key].etaPH;}
+    }
+    // Update ETA in any existing vessel from another source (current parse is fresher)
+    const existing=vessels.find(v=>v.name.toUpperCase().replace(/[^A-Z0-9]/g,'')===key);
+    if(existing&&newV.etaPH&&!existing.etaOverride) existing.etaPH=newV.etaPH;
+  });
+
+  vessels=vessels.concat(parsed);
+  mergeDuplicates();
+  renderTable();
+  updateStats();
+  updateLastUpdate();
+  showResult(src,'ok',`✓ ${parsed.length} vessels · ETAs updated · comments preserved${fmtNote}`);
+}
+
+function showResult(src,type,msg){
+  const el=document.getElementById('res-'+src);
+  if(!el) return;
+  el.textContent=msg;el.className='parse-result '+type;el.style.display='block';
+  setTimeout(()=>{el.style.display='none';},4000);
+}
+
+// ============================================================
+// RENDER TABLE
+// ============================================================
+function renderTable(){
+  const tbody=document.getElementById('tableBody');
+  const search=(document.getElementById('searchBox').value||'').toLowerCase();
+
+  let data=vessels.filter(v=>{
+    if(v.deleted) return false;
+    if(v.isMergedSecondary) return false;
+
+    // SOURCE multi-select
+    if(!activeFilters.source.includes('all')){
+      const srcs=v.mergedSources||[v.source];
+      if(activeFilters.source.includes('combo')){
+        // COMBO: Ifchor OR Arrow OR (SSY + marketed)
+        const hasIfchor = srcs.includes('ifchor');
+        const hasArrow  = srcs.includes('arrow');
+        const hasSsyMkt = srcs.includes('ssy') && v.marketed;
+        if(!hasIfchor && !hasArrow && !hasSsyMkt) return false;
+      } else {
+        if(!activeFilters.source.some(s=>srcs.includes(s))) return false;
+      }
+    }
+
+    // MARKETED
+    if(activeFilters.marketed.includes('yes')&&!v.marketed) return false;
+
+    // SIZE multi-select
+    if(!activeFilters.size.includes('all')){
+      const matchSize=activeFilters.size.some(sz=>{
+        if(sz==='cape') return v.dwt>=160000&&v.dwt<190000;
+        if(sz==='nmax') return v.dwt>=190000&&v.dwt<220000;
+        if(sz==='vloc') return v.dwt>=220000;
+        return true;
+      });
+      if(!matchSize) return false;
+    }
+
+    // ETA tiles multi-select
+    if(!activeFilters.eta.includes('all')){
+      const days=daysFromToday(v.etaPH);
+      const matchEta=activeFilters.eta.some(e=>{
+        if(e==='7')  return days>=0&&days<=7;
+        if(e==='14') return days>=8&&days<=14;
+        if(e==='21') return days>=15&&days<=21;
+        if(e==='28') return days>=22&&days<=28;
+        return true;
+      });
+      if(!matchEta) return false;
+    }
+
+    // DATE RANGE SLIDER
+    const days=daysFromToday(v.etaPH);
+    if(sliderTo<60&&days>sliderTo) return false;
+    if(days<sliderFrom) return false;
+
+    // SEARCH
+    if(search){
+      const hay=((v.name||'')+(v.owner||'')+(v.openPort||'')).toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  // SORT
+  data.sort((a,b)=>{
+    let av,bv;
+    if(sortCol==='etaPH'){av=a.etaPH?a.etaPH.getTime():99999999999;bv=b.etaPH?b.etaPH.getTime():99999999999;}
+    else if(sortCol==='dwt'){av=a.dwt||0;bv=b.dwt||0;}
+    else if(sortCol==='age'){av=a.age||0;bv=b.age||0;}
+    else if(sortCol==='openDate'){av=a.openDate?a.openDate.getTime():99999999999;bv=b.openDate?b.openDate.getTime():99999999999;}
+    else{av=(a[sortCol]||'').toString().toLowerCase();bv=(b[sortCol]||'').toString().toLowerCase();}
+    if(av<bv) return sortDir==='asc'?-1:1;
+    if(av>bv) return sortDir==='asc'?1:-1;
+    return 0;
+  });
+
+  if(data.length===0){
+    tbody.innerHTML='<tr><td colspan="14"><div class="empty-state"><div class="empty-icon">⚓</div><div>'+(vessels.filter(v=>!v.deleted&&!v.isMergedSecondary).length>0?'NO VESSELS MATCH CURRENT FILTERS':'PASTE TONNAGE LISTS FROM THE LEFT PANEL')+'</div></div></td></tr>';
+    document.getElementById('footerRight').textContent='No vessels shown';
+    return;
+  }
+
+  const srcBadge=s=>{
+    if(s==='ssy') return '<span class="src-badge src-ssy">SSY</span>';
+    if(s==='arrow') return '<span class="src-badge src-arrow">ARR</span>';
+    if(s==='ifchor') return '<span class="src-badge src-ifchor">IFC</span>';
+    return '<span class="src-badge src-manual">MAN</span>';
+  };
+
+  const srcBadges=v=>{
+    const srcs=v.mergedSources||[v.source];
+    return srcs.map(s=>srcBadge(s)).join('');
+  };
+
+  const mktBadge=v=>{
+    if(v.marketed) return '<span class="mkt-badge">★</span>';
+    return '<span class="mkt-none">—</span>';
+  };
+
+  const scrubHTML=v=>{
+    if(v.scrubber==='Y') return '<span class="scrubber-y">✓</span>';
+    if(v.scrubber==='N') return '<span class="scrubber-n">—</span>';
+    return '<span class="scrubber-n">?</span>';
+  };
+
+  tbody.innerHTML=data.map(v=>{
+    const urgClass=etaUrgencyClass(v);
+    const rowClass=v.source==='manual'?'manual-row':(v.mergedSources&&v.mergedSources.length>1?'merged-row':'');
+    const confDot=v.mergedSources&&v.mergedSources.length>1?`<span style="color:var(--gold);font-size:9px;margin-left:3px" title="Confirmed in ${v.mergedSources.length} sources">●${v.mergedSources.length}</span>`:'';
+    const manDot=v.source==='manual'?'<span style="color:var(--blue);font-size:9px;margin-left:3px" title="Manually added">+</span>':'';
+    const etaOverrideDot=v.etaOverride?'<span style="color:var(--purple);font-size:8px;margin-left:3px" title="ETA manually overridden">●</span>':'';
+    const etaDisplay=`<span class="eta-display" onclick="startEtaEdit(${v.id},this)" title="Click to override ETA">${fmtDate(v.etaPH)}</span>${etaOverrideDot}<input class="eta-edit-input" id="eta-input-${v.id}" onblur="commitEtaEdit(${v.id},this)" onkeydown="if(event.key==='Enter')commitEtaEdit(${v.id},this);if(event.key==='Escape')cancelEtaEdit(${v.id},this)">`;
+    return `<tr class="${urgClass} ${rowClass}" data-id="${v.id}">
+      <td class="eta-ph">${etaDisplay}</td>
+      <td class="vessel-name">${v.name}${confDot}${manDot}</td>
+      <td class="dwt-col">${v.dwt?v.dwt.toLocaleString():'—'}</td>
+      <td>${v.age!=null?"'"+String(v.age).padStart(2,'0'):'—'}</td>
+      <td>${v.draft?v.draft.toFixed(1):'—'}</td>
+      <td>${scrubHTML(v)}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${v.openPort||'—'}</td>
+      <td>${fmtDate(v.openDate)}</td>
+      <td>${v.owner||'—'}</td>
+      <td>${srcBadges(v)}</td>
+      <td>${mktBadge(v)}</td>
+      <td><input class="offer-input" placeholder="9.85" value="${escHtml(v.offer||'')}" onchange="updateField(${v.id},'offer',this.value)"></td>
+      <td><input class="comment-input" placeholder="notes..." value="${escHtml(v.userComment||'')}" onchange="updateField(${v.id},'userComment',this.value)"></td>
+      <td><button class="del-btn" onclick="deleteVessel(${v.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('footerRight').textContent=`Showing ${data.length} of ${vessels.filter(v=>!v.deleted&&!v.isMergedSecondary).length} vessels — sorted by ${sortCol.toUpperCase()} ${sortDir==='asc'?'▲':'▼'}`;
+}
+
+function escHtml(s){return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+
+// ============================================================
+// ETA OVERRIDE
+// ============================================================
+function startEtaEdit(id, displayEl){
+  const input=document.getElementById('eta-input-'+id);
+  if(!input) return;
+  const v=vessels.find(x=>x.id===id);
+  if(!v) return;
+  displayEl.style.display='none';
+  input.style.display='inline-block';
+  input.value=fmtDateFull(v.etaPH);
+  input.focus(); input.select();
+}
+
+function commitEtaEdit(id, input){
+  const v=vessels.find(x=>x.id===id);
+  if(!v) return;
+  const newDate=parseDate(input.value.trim());
+  if(newDate){
+    v.etaPH=newDate;
+    v.etaOverride=true;
+    // Propagate to merged secondaries
+    const key=v.name.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    vessels.forEach(x=>{if(x.name.toUpperCase().replace(/[^A-Z0-9]/g,'')=== key){x.etaPH=newDate;x.etaOverride=true;}});
+  }
+  input.style.display='none';
+  renderTable();
+}
+
+function cancelEtaEdit(id, input){
+  input.style.display='none';
+  const display=input.previousElementSibling;
+  if(display) display.style.display='';
+}
+
+// ============================================================
+// SORT
+// ============================================================
+function sortBy(col){
+  if(sortCol===col) sortDir=sortDir==='asc'?'desc':'asc';
+  else{sortCol=col;sortDir='asc';}
+  document.querySelectorAll('th').forEach(th=>{th.classList.remove('sorted');const a=th.querySelector('.sort-arrow');if(a)a.textContent='↕';});
+  const th=document.getElementById('th-'+col);
+  if(th){th.classList.add('sorted');const a=th.querySelector('.sort-arrow');if(a)a.textContent=sortDir==='asc'?'▲':'▼';}
+  renderTable();
+}
+
+// ============================================================
+// ADD ROW MANUALLY
+// ============================================================
+function openAddRow(){
+  document.getElementById('addRowModal').classList.add('open');
+  document.getElementById('ar-name').focus();
+}
+
+function submitAddRow(){
+  const name=(document.getElementById('ar-name').value||'').trim();
+  const etaStr=(document.getElementById('ar-eta').value||'').trim();
+  if(!name){showAddRowResult('err','Vessel name is required.');return;}
+  const etaPH=parseDate(etaStr);
+  if(!etaPH){showAddRowResult('err','Invalid ETA format. Try "25 Mar" or "25/03/2026".');return;}
+
+  const rawDwt=parseInt((document.getElementById('ar-dwt').value||'').replace(/[,\s]/g,''));
+  const dwt=isNaN(rawDwt)?null:rawDwt;
+  const rawAge=(document.getElementById('ar-age').value||'').replace(/'/g,'');
+  const age=rawAge?parseInt(rawAge):null;
+
+  const v={id:++idCounter,source:'manual',name,dwt,age,
+    draft:parseFloat(document.getElementById('ar-draft').value)||null,
+    scrubber:document.getElementById('ar-scrubber').value,
+    openPort:(document.getElementById('ar-port').value||'').trim(),
+    openDate:parseDate(document.getElementById('ar-opendate').value),
+    etaPH,owner:(document.getElementById('ar-owner').value||'').trim(),
+    offer:(document.getElementById('ar-offer').value||'').trim(),
+    userComment:(document.getElementById('ar-comment').value||'').trim(),
+    aisDest:'',comment:'',marketed:false,
+    deleted:false,isDuplicate:false,isMergedSecondary:false,mergedSources:null,etaOverride:true};
+
+  vessels.push(v);
+  mergeDuplicates();
+  renderTable();
+  updateStats();
+
+  // Clear form
+  ['ar-name','ar-eta','ar-dwt','ar-age','ar-draft','ar-port','ar-opendate','ar-owner','ar-offer','ar-comment'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('ar-scrubber').value='?';
+  document.getElementById('addRowModal').classList.remove('open');
+}
+
+function showAddRowResult(type,msg){
+  const el=document.getElementById('res-addrow');
+  el.textContent=msg;el.className='parse-result '+type;el.style.display='block';
+  setTimeout(()=>{el.style.display='none';},3000);
+}
+
+// ============================================================
+// FIELD UPDATES
+// ============================================================
+function updateField(id,field,val){
+  const v=vessels.find(x=>x.id===id);
+  if(!v) return;
+  v[field]=val;
+  // Propagate to merged secondaries
+  const key=v.name.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  vessels.forEach(x=>{if(x.name.toUpperCase().replace(/[^A-Z0-9]/g,'')=== key) x[field]=val;});
+}
+
+function deleteVessel(id){
+  const v=vessels.find(x=>x.id===id);
+  if(!v) return;
+  const key=v.name.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  vessels.forEach(x=>{if(x.name.toUpperCase().replace(/[^A-Z0-9]/g,'')=== key) x.deleted=true;});
+  mergeDuplicates(); renderTable(); updateStats();
+}
+
+function clearAll(){
+  if(!confirm('Clear all loaded tonnage lists?')) return;
+  vessels=[];
+  ['ssy','arrow','ifchor'].forEach(s=>{
+    const el=document.getElementById('paste-'+s); if(el) el.value='';
+    const re=document.getElementById('res-'+s); if(re) re.style.display='none';
+  });
+  renderTable(); updateStats();
+}
+
+// ============================================================
+// STATS & TIMESTAMPS
+// ============================================================
+function updateStats(){
+  const active=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
+  document.getElementById('cnt-ssy').textContent=vessels.filter(v=>!v.deleted&&(v.source==='ssy'||(v.mergedSources||[]).includes('ssy'))).length;
+  document.getElementById('cnt-arrow').textContent=vessels.filter(v=>!v.deleted&&(v.source==='arrow'||(v.mergedSources||[]).includes('arrow'))).length;
+  document.getElementById('cnt-ifchor').textContent=vessels.filter(v=>!v.deleted&&(v.source==='ifchor'||(v.mergedSources||[]).includes('ifchor'))).length;
+  document.getElementById('cnt-total').textContent=active.length;
+  document.getElementById('cnt-marketed').textContent=active.filter(v=>v.marketed).length;
+  document.getElementById('cnt-dupes').textContent=active.filter(v=>v.mergedSources&&v.mergedSources.length>1).length;
+}
+
+function updateLastUpdate(){
+  const now=new Date();
+  document.getElementById('lastUpdate').textContent=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+' SGT — '+now.getDate()+' '+MONTHS[now.getMonth()];
+}
+
+// ============================================================
+// PUBLISH & SHARE (using localStorage + URL hash for same-origin)
+// For cross-device sharing we use a free public JSONBin-style approach
+// ============================================================
+let publishedShareId = null;
+
+async function publishList(){
+  const active=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
+  if(!active.length){alert('No vessels to publish.');return;}
+
+  const statusEl=document.getElementById('publishStatus');
+  statusEl.textContent='⏳ Publishing...';statusEl.className='publish-status loading';
+
+  // Serialise list
+  const payload={
+    publishedAt: new Date().toISOString(),
+    publishedBy: 'Charterer',
+    vessels: active.map(v=>({
+      name:v.name, dwt:v.dwt, age:v.age, draft:v.draft, scrubber:v.scrubber,
+      openPort:v.openPort, openDate:v.openDate?v.openDate.toISOString():null,
+      etaPH:v.etaPH?v.etaPH.toISOString():null, owner:v.owner,
+      sources:(v.mergedSources||[v.source]),
+      marketed:v.marketed, offer:v.offer, userComment:v.userComment,
+      etaOverride:v.etaOverride
+    }))
+  };
+
+  try {
+    // Use JSONBin.io free tier — no auth needed for public bins
+    const resp = await fetch('https://api.jsonbin.io/v3/b', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Bin-Private': 'false',
+        'X-Bin-Name': 'Cape Desk Tonnage '+new Date().toLocaleDateString()
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if(!resp.ok) throw new Error('API error '+resp.status);
+    const data = await resp.json();
+    const binId = data.metadata.id;
+    publishedShareId = binId;
+
+    const shareUrl = window.location.href.split('?')[0]+'?view='+binId;
+    document.getElementById('shareUrlDisplay').textContent=shareUrl;
+    document.getElementById('shareUrlModal').textContent=shareUrl;
+
+    // Show published badge
+    const now=new Date();
+    document.getElementById('publishedBadge').style.display='flex';
+    document.getElementById('publishedTime').textContent=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+
+    statusEl.textContent='✓ Published! Click link above to copy & share.';statusEl.className='publish-status ok';
+    document.getElementById('shareModal').classList.add('open');
+
+    // Save locally too
+    localStorage.setItem(STORAGE_KEY+'_latest', JSON.stringify({binId,publishedAt:now.toISOString()}));
+  } catch(e) {
+    // Fallback: encode in URL (works for smaller lists, same device)
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload)))).substring(0,2000);
+    statusEl.textContent = '⚠ Could not reach share server. Encoded link created (same device only).';
+    statusEl.className='publish-status err';
+    console.warn('Publish error:', e);
+  }
+}
+
+async function loadSharedView(){
+  const params=new URLSearchParams(window.location.search);
+  const binId=params.get('view');
+  if(!binId) return;
+
+  // Show view-only banner, hide sidebar
+  document.getElementById('viewBanner').classList.add('show');
+  document.getElementById('sidebar').style.display='none';
+  document.getElementById('mainLayout').style.gridTemplateColumns='1fr';
+
+  try {
+    const resp=await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`);
+    if(!resp.ok) throw new Error('Could not load shared data.');
+    const data=await resp.json();
+    const payload=data.record;
+
+    vessels=payload.vessels.map((v,i)=>({
+      id:++idCounter,
+      source:v.sources&&v.sources.length?v.sources[0]:'ssy',
+      name:v.name, dwt:v.dwt, age:v.age, draft:v.draft, scrubber:v.scrubber||'?',
+      openPort:v.openPort,
+      openDate:v.openDate?new Date(v.openDate):null,
+      etaPH:v.etaPH?new Date(v.etaPH):null,
+      owner:v.owner, marketed:v.marketed||false,
+      offer:v.offer||'', userComment:v.userComment||'',
+      etaOverride:v.etaOverride||false,
+      aisDest:'',comment:'',deleted:false,isDuplicate:false,
+      isMergedSecondary:false,
+      mergedSources:v.sources&&v.sources.length>1?v.sources:null
+    }));
+
+    const pubTime=new Date(payload.publishedAt);
+    document.getElementById('viewBanner').innerHTML=`<span>👁 VIEW MODE — Tonnage list published by Charterer at ${pubTime.toLocaleString()}. ${vessels.length} vessels.</span><button class="action-btn" style="border-color:var(--blue);color:var(--blue);font-size:9px" onclick="loadSharedView()">↻ REFRESH</button>`;
+
+    renderTable(); updateStats();
+  } catch(e) {
+    document.getElementById('viewBanner').innerHTML='<span style="color:var(--red)">⚠ Could not load shared tonnage list. '+e.message+'</span>';
+  }
+}
+
+function copyShareUrl(){
+  const url=document.getElementById('shareUrlDisplay').textContent;
+  if(url==='—') return;
+  navigator.clipboard.writeText(url).then(()=>{
+    const el=document.getElementById('shareUrlDisplay');
+    el.textContent='✓ Copied!';
+    setTimeout(()=>el.textContent=url,2000);
+  }).catch(()=>alert('Copy failed. Please copy manually:\n'+url));
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportCSV(){
+  const active=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
+  if(!active.length){alert('No vessels to export.');return;}
+  const rows=[['ETA PH','VESSEL NAME','DWT','BLT','DRAFT','SCRUBBER','OPEN PORT','OPEN DATE','OWNER','SOURCE','MARKETED','OFFER ($/T)','COMMENTS']];
+  const sorted=[...active].sort((a,b)=>(a.etaPH?.getTime()||9e12)-(b.etaPH?.getTime()||9e12));
+  sorted.forEach(v=>rows.push([
+    fmtDate(v.etaPH),v.name,v.dwt||'',v.age!=null?"'"+String(v.age).padStart(2,'0'):'',
+    v.draft||'',v.scrubber||'',v.openPort||'',fmtDate(v.openDate),v.owner||'',
+    (v.mergedSources||[v.source]).map(s=>s.toUpperCase()).join(', '),
+    v.marketed?'YES':'',v.offer||'',v.userComment||''
+  ]));
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  a.download='tonnage_list_PH_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function exportText(){
+  const active=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
+  if(!active.length){alert('No vessels loaded.');return;}
+  const sorted=[...active].sort((a,b)=>(a.etaPH?.getTime()||9e12)-(b.etaPH?.getTime()||9e12));
+  const pad=(s,n)=>String(s||'—').padEnd(n);
+  const header=pad('ETA PH',10)+pad('VESSEL NAME',26)+pad('DWT',10)+pad('BLT',6)+pad('OPEN PORT',18)+pad('OPEN DATE',12)+pad('OWNER',20)+pad('SRC',16)+pad('OFFER',10)+'MKT';
+  const sep='─'.repeat(130);
+  const lines=sorted.map(v=>
+    pad(fmtDate(v.etaPH),10)+pad(v.name,26)+pad(v.dwt?v.dwt.toLocaleString():'—',10)+
+    pad(v.age!=null?"'"+String(v.age).padStart(2,'0'):'—',6)+pad(v.openPort,18)+
+    pad(fmtDate(v.openDate),12)+pad(v.owner,20)+
+    pad((v.mergedSources||[v.source]).map(s=>s.toUpperCase()).join('+'),16)+
+    pad(v.offer||'',10)+(v.marketed?'★':'')
+  );
+  const text=`TONNAGE LIST — PORT HEDLAND ETA\nGenerated: ${new Date().toLocaleString()}\n${sep}\n${header}\n${sep}\n${lines.join('\n')}\n${sep}\nTotal: ${sorted.length} vessels`;
+  document.getElementById('exportTextArea').value=text;
+  document.getElementById('exportModal').classList.add('open');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    document.getElementById('exportModal').classList.remove('open');
+    document.getElementById('addRowModal').classList.remove('open');
+    document.getElementById('shareModal').classList.remove('open');
+  }
+});
+['exportModal','addRowModal','shareModal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+});
+
+initSlider();
+renderTable();
+updateStats();
+
+// Auto-load shared view if URL has ?view= param
+if(window.location.search.includes('view=')) loadSharedView();
+</script>
+</body>
+</html>
