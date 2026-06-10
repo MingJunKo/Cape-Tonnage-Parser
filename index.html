@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -18,201 +17,198 @@
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;overflow-x:hidden}
 
 /* HEADER */
-.hdr{background:var(–bg2);border-bottom:2px solid var(–gold);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;gap:10px;flex-wrap:wrap}
-.logo{font-family:‘Bebas Neue’,sans-serif;font-size:22px;letter-spacing:3px;color:var(–gold);display:flex;align-items:center;gap:10px}
-.logo-sub{font-family:‘IBM Plex Mono’,monospace;font-size:9px;color:var(–text3);letter-spacing:2px;border-left:1px solid var(–border2);padding-left:10px;line-height:1.5}
+.hdr{background:var(--bg2);border-bottom:2px solid var(--gold);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;gap:10px;flex-wrap:wrap}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--gold);display:flex;align-items:center;gap:10px}
+.logo-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:2px;border-left:1px solid var(--border2);padding-left:10px;line-height:1.5}
 .hdr-stats{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.stat-pill{background:var(–bg3);border:1px solid var(–border2);border-radius:3px;padding:4px 10px;font-family:‘IBM Plex Mono’,monospace;font-size:11px;display:flex;align-items:center;gap:5px}
+.stat-pill{background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:4px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;display:flex;align-items:center;gap:5px}
 .stat-val{font-weight:600}
-.stat-ssy{color:var(–ssy)}.stat-arrow{color:var(–arrow)}.stat-ifchor{color:var(–ifchor)}.stat-total{color:var(–gold);font-size:13px}
+.stat-ssy{color:var(--ssy)}.stat-arrow{color:var(--arrow)}.stat-ifchor{color:var(--ifchor)}.stat-total{color:var(--gold);font-size:13px}
 
 /* LAYOUT */
 .layout{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 57px)}
 
 /* SIDEBAR */
-.sidebar{background:var(–bg2);border-right:1px solid var(–border);overflow-y:auto;display:flex;flex-direction:column}
-.sidebar-section{padding:12px 14px;border-bottom:1px solid var(–border)}
-.sec-label{font-family:‘IBM Plex Mono’,monospace;font-size:9px;letter-spacing:2px;color:var(–text3);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
-textarea.paste-box{width:100%;background:var(–bg);border:1px solid var(–border2);border-radius:4px;color:var(–text2);font-family:‘IBM Plex Mono’,monospace;font-size:10px;padding:8px;resize:none;height:160px;outline:none;line-height:1.6;transition:border-color 0.15s}
-textarea.paste-box:focus{border-color:var(–gold)}
-textarea.paste-box::placeholder{color:var(–text3)}
-.parse-btn{width:100%;margin-top:6px;padding:8px;border:none;border-radius:4px;cursor:pointer;font-family:‘IBM Plex Mono’,monospace;font-size:11px;font-weight:600;letter-spacing:1px;transition:all 0.15s}
-.parse-btn.ssy{background:rgba(167,139,250,0.15);color:var(–ssy);border:1px solid var(–ssy)}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.sidebar-section{padding:12px 14px;border-bottom:1px solid var(--border)}
+.sec-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+textarea.paste-box{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:4px;color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;padding:8px;resize:none;height:160px;outline:none;line-height:1.6;transition:border-color 0.15s}
+textarea.paste-box:focus{border-color:var(--gold)}
+textarea.paste-box::placeholder{color:var(--text3)}
+.parse-btn{width:100%;margin-top:6px;padding:8px;border:none;border-radius:4px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1px;transition:all 0.15s}
+.parse-btn.ssy{background:rgba(167,139,250,0.15);color:var(--ssy);border:1px solid var(--ssy)}
 .parse-btn.ssy:hover{background:rgba(167,139,250,0.25)}
-.parse-btn.arrow{background:rgba(0,212,170,0.12);color:var(–arrow);border:1px solid var(–arrow)}
+.parse-btn.arrow{background:rgba(0,212,170,0.12);color:var(--arrow);border:1px solid var(--arrow)}
 .parse-btn.arrow:hover{background:rgba(0,212,170,0.22)}
-.parse-btn.ifchor{background:rgba(74,158,255,0.12);color:var(–ifchor);border:1px solid var(–ifchor)}
+.parse-btn.ifchor{background:rgba(74,158,255,0.12);color:var(--ifchor);border:1px solid var(--ifchor)}
 .parse-btn.ifchor:hover{background:rgba(74,158,255,0.22)}
-.parse-result{margin-top:6px;font-family:‘IBM Plex Mono’,monospace;font-size:10px;padding:5px 8px;border-radius:3px;display:none}
-.parse-result.ok{background:rgba(0,212,170,0.08);color:var(–teal);border:1px solid rgba(0,212,170,0.2)}
-.parse-result.err{background:rgba(255,71,87,0.08);color:var(–red);border:1px solid rgba(255,71,87,0.2)}
-.action-btn{padding:5px 12px;border-radius:3px;font-family:‘IBM Plex Mono’,monospace;font-size:10px;font-weight:600;cursor:pointer;border:1px solid;letter-spacing:0.5px;transition:all 0.15s;white-space:nowrap}
-.btn-export{background:rgba(0,212,170,0.1);color:var(–teal);border-color:var(–teal)}
+.parse-result{margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:5px 8px;border-radius:3px;display:none}
+.parse-result.ok{background:rgba(0,212,170,0.08);color:var(--teal);border:1px solid rgba(0,212,170,0.2)}
+.parse-result.err{background:rgba(255,71,87,0.08);color:var(--red);border:1px solid rgba(255,71,87,0.2)}
+.action-btn{padding:5px 12px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;cursor:pointer;border:1px solid;letter-spacing:0.5px;transition:all 0.15s;white-space:nowrap}
+.btn-export{background:rgba(0,212,170,0.1);color:var(--teal);border-color:var(--teal)}
 .btn-export:hover{background:rgba(0,212,170,0.2)}
-.btn-clear{background:rgba(255,71,87,0.08);color:var(–red);border-color:var(–red)}
+.btn-clear{background:rgba(255,71,87,0.08);color:var(--red);border-color:var(--red)}
 .btn-clear:hover{background:rgba(255,71,87,0.15)}
-.btn-publish{background:rgba(240,180,41,0.15);color:var(–gold);border-color:var(–gold);font-size:12px;padding:8px 16px;width:100%;margin-top:6px}
+.btn-publish{background:rgba(240,180,41,0.15);color:var(--gold);border-color:var(--gold);font-size:12px;padding:8px 16px;width:100%;margin-top:6px}
 .btn-publish:hover{background:rgba(240,180,41,0.25)}
-.btn-add-row{background:rgba(74,158,255,0.1);color:var(–blue);border-color:var(–blue)}
+.btn-add-row{background:rgba(74,158,255,0.1);color:var(--blue);border-color:var(--blue)}
 .btn-add-row:hover{background:rgba(74,158,255,0.2)}
 
 /* FILTER BAR — two rows */
-.filter-wrap{background:var(–bg2);border-bottom:1px solid var(–border);position:sticky;top:0;z-index:100}
+.filter-wrap{background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
 .filter-row{padding:7px 14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.filter-label{font-family:‘IBM Plex Mono’,monospace;font-size:9px;color:var(–text3);letter-spacing:1.5px;white-space:nowrap}
+.filter-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1.5px;white-space:nowrap}
 
 /* Multi-select chips — click toggles, no shift needed */
-.filter-chip{padding:3px 9px;border-radius:3px;font-family:‘IBM Plex Mono’,monospace;font-size:10px;cursor:pointer;border:1px solid var(–border2);color:var(–text3);background:var(–bg3);transition:all 0.12s;white-space:nowrap;user-select:none}
-.filter-chip:hover{color:var(–text2)}
+.filter-chip{padding:3px 9px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:10px;cursor:pointer;border:1px solid var(--border2);color:var(--text3);background:var(--bg3);transition:all 0.12s;white-space:nowrap;user-select:none}
+.filter-chip:hover{color:var(--text2)}
 .filter-chip.active{font-weight:600}
 /* Source colours */
-.fc-all.active{background:rgba(240,180,41,0.1);border-color:var(–gold);color:var(–gold)}
-.fc-ssy.active{background:rgba(167,139,250,0.1);border-color:var(–ssy);color:var(–ssy)}
-.fc-arrow.active{background:rgba(0,212,170,0.08);border-color:var(–arrow);color:var(–arrow)}
-.fc-ifchor.active{background:rgba(74,158,255,0.08);border-color:var(–ifchor);color:var(–ifchor)}
-.fc-marketed.active{background:rgba(240,180,41,0.08);border-color:var(–marketed);color:var(–marketed)}
-.fc-combo.active{background:linear-gradient(90deg,rgba(0,212,170,0.1),rgba(74,158,255,0.1),rgba(240,180,41,0.1));border-color:var(–teal);color:var(–teal)}
+.fc-all.active{background:rgba(240,180,41,0.1);border-color:var(--gold);color:var(--gold)}
+.fc-ssy.active{background:rgba(167,139,250,0.1);border-color:var(--ssy);color:var(--ssy)}
+.fc-arrow.active{background:rgba(0,212,170,0.08);border-color:var(--arrow);color:var(--arrow)}
+.fc-ifchor.active{background:rgba(74,158,255,0.08);border-color:var(--ifchor);color:var(--ifchor)}
+.fc-marketed.active{background:rgba(240,180,41,0.08);border-color:var(--marketed);color:var(--marketed)}
+.fc-combo.active{background:linear-gradient(90deg,rgba(0,212,170,0.1),rgba(74,158,255,0.1),rgba(240,180,41,0.1));border-color:var(--teal);color:var(--teal)}
 /* ETA colours */
-.fc-eta7.active{background:rgba(255,71,87,0.1);border-color:var(–red);color:var(–red)}
-.fc-eta14.active{background:rgba(255,107,53,0.1);border-color:var(–orange);color:var(–orange)}
-.fc-eta21.active{background:rgba(0,212,170,0.08);border-color:var(–teal);color:var(–teal)}
-.fc-eta28.active{background:rgba(139,149,165,0.1);border-color:var(–text3);color:var(–text2)}
+.fc-eta7.active{background:rgba(255,71,87,0.1);border-color:var(--red);color:var(--red)}
+.fc-eta14.active{background:rgba(255,107,53,0.1);border-color:var(--orange);color:var(--orange)}
+.fc-eta21.active{background:rgba(0,212,170,0.08);border-color:var(--teal);color:var(--teal)}
+.fc-eta28.active{background:rgba(139,149,165,0.1);border-color:var(--text3);color:var(--text2)}
 /* Size colours */
-.fc-cape.active{background:rgba(74,158,255,0.08);border-color:var(–blue);color:var(–blue)}
-.fc-nmax.active{background:rgba(167,139,250,0.08);border-color:var(–purple);color:var(–purple)}
-.fc-vloc.active{background:rgba(240,180,41,0.08);border-color:var(–gold);color:var(–gold)}
+.fc-cape.active{background:rgba(74,158,255,0.08);border-color:var(--blue);color:var(--blue)}
+.fc-nmax.active{background:rgba(167,139,250,0.08);border-color:var(--purple);color:var(--purple)}
+.fc-vloc.active{background:rgba(240,180,41,0.08);border-color:var(--gold);color:var(--gold)}
 
 /* Compact inline slider — lives inside the single filter row after ETA tiles */
-.inline-slider-wrap{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.03);border:1px solid var(–border2);border-radius:3px;padding:2px 8px;margin:0 4px}
-.date-range-val{font-family:‘IBM Plex Mono’,monospace;font-size:9px;color:var(–gold);white-space:nowrap;min-width:42px;text-align:center}
-input[type=range].slider{-webkit-appearance:none;appearance:none;width:70px;height:3px;background:var(–border2);border-radius:2px;outline:none;cursor:pointer}
-input[type=range].slider::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(–gold);cursor:pointer}
-.range-reset{font-family:‘IBM Plex Mono’,monospace;font-size:9px;color:var(–text3);cursor:pointer;padding:1px 4px;border-radius:2px;transition:all 0.12s;border:1px solid transparent}
-.range-reset:hover{color:var(–red);border-color:var(–red)}
+.inline-slider-wrap{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.03);border:1px solid var(--border2);border-radius:3px;padding:2px 8px;margin:0 4px}
+.date-range-val{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);white-space:nowrap;min-width:42px;text-align:center}
+input[type=range].slider{-webkit-appearance:none;appearance:none;width:70px;height:3px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer}
+input[type=range].slider::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--gold);cursor:pointer}
+.range-reset{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);cursor:pointer;padding:1px 4px;border-radius:2px;transition:all 0.12s;border:1px solid transparent}
+.range-reset:hover{color:var(--red);border-color:var(--red)}
 
-.search-box{background:var(–bg3);border:1px solid var(–border2);border-radius:4px;padding:4px 10px;font-family:‘IBM Plex Mono’,monospace;font-size:11px;color:var(–text);outline:none;width:150px;transition:border-color 0.15s}
-.search-box:focus{border-color:var(–gold)}
-.search-box::placeholder{color:var(–text3)}
+.search-box{background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:4px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);outline:none;width:150px;transition:border-color 0.15s}
+.search-box:focus{border-color:var(--gold)}
+.search-box::placeholder{color:var(--text3)}
 
 /* MAIN TABLE */
 .main{display:flex;flex-direction:column;overflow:hidden}
 .table-wrap{flex:1;overflow:auto}
 table{width:100%;border-collapse:collapse;min-width:1300px}
-thead tr{background:var(–bg3);position:sticky;top:0;z-index:50}
-th{font-family:‘IBM Plex Mono’,monospace;font-size:9px;letter-spacing:1.2px;color:var(–text3);text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(–border2);white-space:nowrap;cursor:pointer;user-select:none;transition:color 0.1s}
-th:hover{color:var(–text2)}
-th.sorted{color:var(–gold)}
+thead tr{background:var(--bg3);position:sticky;top:0;z-index:50}
+th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.2px;color:var(--text3);text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border2);white-space:nowrap;cursor:pointer;user-select:none;transition:color 0.1s}
+th:hover{color:var(--text2)}
+th.sorted{color:var(--gold)}
 th .sort-arrow{margin-left:3px;opacity:0.5;font-size:9px}
-th.sorted .sort-arrow{opacity:1;color:var(–gold)}
+th.sorted .sort-arrow{opacity:1;color:var(--gold)}
 th.no-sort{cursor:default}
-th.no-sort:hover{color:var(–text3)}
+th.no-sort:hover{color:var(--text3)}
 tbody tr{border-bottom:1px solid rgba(28,34,48,0.6);transition:background 0.1s}
 tbody tr:hover{background:rgba(255,255,255,0.018)}
-td{padding:6px 10px;font-family:‘IBM Plex Mono’,monospace;font-size:11px;color:var(–text2);white-space:nowrap;vertical-align:middle}
-td.vessel-name{color:var(–text);font-weight:500;font-size:12px;min-width:150px}
+td{padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap;vertical-align:middle}
+td.vessel-name{color:var(--text);font-weight:500;font-size:12px;min-width:150px}
 td.eta-ph{font-weight:600}
-td.dwt-col{color:var(–text)}
+td.dwt-col{color:var(--text)}
 
 /* ETA urgency */
-tr.eta-urgent td.eta-ph{color:var(–red)!important}
-tr.eta-soon td.eta-ph{color:var(–orange)!important}
-tr.eta-ok td.eta-ph{color:var(–teal)!important}
-tr.eta-far td.eta-ph{color:var(–text3)!important}
-tr.eta-manual td.eta-ph{color:var(–purple)!important}
+tr.eta-urgent td.eta-ph{color:var(--red)!important}
+tr.eta-soon td.eta-ph{color:var(--orange)!important}
+tr.eta-ok td.eta-ph{color:var(--teal)!important}
+tr.eta-far td.eta-ph{color:var(--text3)!important}
+tr.eta-manual td.eta-ph{color:var(--purple)!important}
 
 /* Merged row */
 tr.merged-row{background:rgba(240,180,41,0.025)!important}
-tr.merged-row td.vessel-name{color:var(–gold)!important}
+tr.merged-row td.vessel-name{color:var(--gold)!important}
 
 /* Manual row */
-tr.manual-row td.vessel-name{color:var(–blue)!important}
+tr.manual-row td.vessel-name{color:var(--blue)!important}
 tr.manual-row{background:rgba(74,158,255,0.025)!important}
 
 /* Badges */
 .src-badge{display:inline-flex;align-items:center;padding:1px 6px;border-radius:2px;font-size:9px;font-weight:600;letter-spacing:0.5px;margin-right:2px}
-.src-ssy{background:rgba(167,139,250,0.12);color:var(–ssy);border:1px solid rgba(167,139,250,0.25)}
-.src-arrow{background:rgba(0,212,170,0.1);color:var(–arrow);border:1px solid rgba(0,212,170,0.2)}
-.src-ifchor{background:rgba(74,158,255,0.1);color:var(–ifchor);border:1px solid rgba(74,158,255,0.2)}
-.src-manual{background:rgba(74,158,255,0.1);color:var(–blue);border:1px solid rgba(74,158,255,0.2)}
-.mkt-badge{display:inline-flex;padding:1px 6px;border-radius:2px;font-size:9px;font-weight:600;background:rgba(240,180,41,0.1);color:var(–gold);border:1px solid rgba(240,180,41,0.25)}
-.mkt-none{color:var(–text3);font-size:10px}
+.src-ssy{background:rgba(167,139,250,0.12);color:var(--ssy);border:1px solid rgba(167,139,250,0.25)}
+.src-arrow{background:rgba(0,212,170,0.1);color:var(--arrow);border:1px solid rgba(0,212,170,0.2)}
+.src-ifchor{background:rgba(74,158,255,0.1);color:var(--ifchor);border:1px solid rgba(74,158,255,0.2)}
+.src-manual{background:rgba(74,158,255,0.1);color:var(--blue);border:1px solid rgba(74,158,255,0.2)}
+.mkt-badge{display:inline-flex;padding:1px 6px;border-radius:2px;font-size:9px;font-weight:600;background:rgba(240,180,41,0.1);color:var(--gold);border:1px solid rgba(240,180,41,0.25)}
+.mkt-none{color:var(--text3);font-size:10px}
 
 /* ETA override */
 .eta-override-wrap{position:relative;display:inline-flex;align-items:center;gap:4px}
 .eta-display{cursor:pointer;padding:1px 3px;border-radius:2px;transition:background 0.1s}
 .eta-display:hover{background:rgba(240,180,41,0.1)}
-.eta-edit-input{background:var(–bg3);border:1px solid var(–gold);color:var(–gold);font-family:‘IBM Plex Mono’,monospace;font-size:11px;width:80px;padding:2px 5px;border-radius:3px;outline:none;display:none}
-.eta-override-dot{width:5px;height:5px;border-radius:50%;background:var(–purple);display:none;title:‘Manual override’}
+.eta-edit-input{background:var(--bg3);border:1px solid var(--gold);color:var(--gold);font-family:'IBM Plex Mono',monospace;font-size:11px;width:80px;padding:2px 5px;border-radius:3px;outline:none;display:none}
+.eta-override-dot{width:5px;height:5px;border-radius:50%;background:var(--purple);display:none;title:'Manual override'}
 
 /* Editable inputs */
-.comment-input{background:transparent;border:none;border-bottom:1px solid var(–border);color:var(–text2);font-family:‘IBM Plex Mono’,monospace;font-size:10px;width:130px;padding:2px 4px;outline:none;transition:border-color 0.15s}
-.comment-input:focus{border-bottom-color:var(–gold);color:var(–text)}
-.comment-input::placeholder{color:var(–text3)}
-.offer-input{background:transparent;border:none;border-bottom:1px solid rgba(240,180,41,0.25);color:var(–gold);font-family:‘IBM Plex Mono’,monospace;font-size:10px;width:80px;padding:2px 4px;outline:none;transition:border-color 0.15s}
-.offer-input:focus{border-bottom-color:var(–gold);background:rgba(240,180,41,0.04)}
+.comment-input{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:10px;width:130px;padding:2px 4px;outline:none;transition:border-color 0.15s}
+.comment-input:focus{border-bottom-color:var(--gold);color:var(--text)}
+.comment-input::placeholder{color:var(--text3)}
+.offer-input{background:transparent;border:none;border-bottom:1px solid rgba(240,180,41,0.25);color:var(--gold);font-family:'IBM Plex Mono',monospace;font-size:10px;width:80px;padding:2px 4px;outline:none;transition:border-color 0.15s}
+.offer-input:focus{border-bottom-color:var(--gold);background:rgba(240,180,41,0.04)}
 .offer-input::placeholder{color:rgba(240,180,41,0.3);font-size:9px}
-.del-btn{background:none;border:none;color:var(–text3);cursor:pointer;font-size:13px;padding:2px 5px;border-radius:2px;transition:all 0.15s;line-height:1}
-.del-btn:hover{background:rgba(255,71,87,0.15);color:var(–red)}
+.del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;border-radius:2px;transition:all 0.15s;line-height:1}
+.del-btn:hover{background:rgba(255,71,87,0.15);color:var(--red)}
 
 /* Empty state */
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(–text3);font-family:‘IBM Plex Mono’,monospace;font-size:11px;letter-spacing:1px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px}
 .empty-icon{font-size:36px;opacity:0.3}
 
 /* FOOTER */
-.footer{background:var(–bg2);border-top:1px solid var(–border);padding:7px 16px;display:flex;align-items:center;justify-content:space-between;font-family:‘IBM Plex Mono’,monospace;font-size:10px;color:var(–text3)}
+.footer{background:var(--bg2);border-top:1px solid var(--border);padding:7px 16px;display:flex;align-items:center;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3)}
 .footer-note{display:flex;gap:14px;flex-wrap:wrap}
 .legend-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
 
 /* Scrubber */
-.scrubber-y{color:var(–teal);font-size:9px;font-weight:600}
-.scrubber-n{color:var(–text3);font-size:9px}
+.scrubber-y{color:var(--teal);font-size:9px;font-weight:600}
+.scrubber-n{color:var(--text3);font-size:9px}
 
 /* Scrollbar */
 ::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:var(–bg)}
-::-webkit-scrollbar-thumb{background:var(–border2);border-radius:2px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
 /* MODALS */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(–bg2);border:1px solid var(–border2);border-radius:6px;padding:20px;width:580px;max-height:85vh;overflow:auto}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:20px;width:580px;max-height:85vh;overflow:auto}
 .modal-lg{width:700px}
-.modal-title{font-family:‘Bebas Neue’,sans-serif;font-size:18px;letter-spacing:2px;color:var(–gold);margin-bottom:14px}
-.modal-textarea{width:100%;height:280px;background:var(–bg);border:1px solid var(–border2);color:var(–teal);font-family:‘IBM Plex Mono’,monospace;font-size:10px;padding:10px;border-radius:4px;resize:none;outline:none}
-.modal-close{margin-top:10px;padding:7px 16px;background:var(–bg3);border:1px solid var(–border2);color:var(–text2);font-family:‘IBM Plex Mono’,monospace;font-size:11px;cursor:pointer;border-radius:3px}
-.modal-close:hover{border-color:var(–gold);color:var(–gold)}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold);margin-bottom:14px}
+.modal-textarea{width:100%;height:280px;background:var(--bg);border:1px solid var(--border2);color:var(--teal);font-family:'IBM Plex Mono',monospace;font-size:10px;padding:10px;border-radius:4px;resize:none;outline:none}
+.modal-close{margin-top:10px;padding:7px 16px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;border-radius:3px}
+.modal-close:hover{border-color:var(--gold);color:var(--gold)}
 
 /* Add Row Form */
 .add-row-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .form-group{display:flex;flex-direction:column;gap:4px}
-.form-label{font-family:‘IBM Plex Mono’,monospace;font-size:9px;color:var(–text3);letter-spacing:1px;text-transform:uppercase}
-.form-input{background:var(–bg3);border:1px solid var(–border2);color:var(–text);font-family:‘IBM Plex Mono’,monospace;font-size:11px;padding:6px 8px;border-radius:3px;outline:none;transition:border-color 0.15s}
-.form-input:focus{border-color:var(–gold)}
+.form-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+.form-input{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 8px;border-radius:3px;outline:none;transition:border-color 0.15s}
+.form-input:focus{border-color:var(--gold)}
 
 /* Publish panel */
 .publish-panel{background:rgba(240,180,41,0.04);border:1px solid rgba(240,180,41,0.2);border-radius:4px;padding:10px;margin-top:8px}
-.publish-status{font-family:‘IBM Plex Mono’,monospace;font-size:10px;margin-top:6px;padding:5px 8px;border-radius:3px;display:none}
-.publish-status.ok{background:rgba(0,212,170,0.08);color:var(–teal);border:1px solid rgba(0,212,170,0.2);display:block}
-.publish-status.err{background:rgba(255,71,87,0.08);color:var(–red);border:1px solid rgba(255,71,87,0.2);display:block}
-.publish-status.loading{background:rgba(240,180,41,0.05);color:var(–gold);border:1px solid rgba(240,180,41,0.2);display:block}
+.publish-status{font-family:'IBM Plex Mono',monospace;font-size:10px;margin-top:6px;padding:5px 8px;border-radius:3px;display:none}
+.publish-status.ok{background:rgba(0,212,170,0.08);color:var(--teal);border:1px solid rgba(0,212,170,0.2);display:block}
+.publish-status.err{background:rgba(255,71,87,0.08);color:var(--red);border:1px solid rgba(255,71,87,0.2);display:block}
+.publish-status.loading{background:rgba(240,180,41,0.05);color:var(--gold);border:1px solid rgba(240,180,41,0.2);display:block}
 
 /* View-only banner */
-.view-banner{background:rgba(74,158,255,0.08);border-bottom:1px solid rgba(74,158,255,0.2);padding:6px 16px;font-family:‘IBM Plex Mono’,monospace;font-size:10px;color:var(–blue);display:none;align-items:center;justify-content:space-between}
+.view-banner{background:rgba(74,158,255,0.08);border-bottom:1px solid rgba(74,158,255,0.2);padding:6px 16px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--blue);display:none;align-items:center;justify-content:space-between}
 .view-banner.show{display:flex}
 </style>
-
 </head>
 <body>
 
 <!-- VIEW-ONLY BANNER (shown to colleagues) -->
-
 <div class="view-banner" id="viewBanner">
   <span>👁 VIEW MODE — You are viewing a shared tonnage list. Use the link to view the latest published data.</span>
   <button class="action-btn" style="border-color:var(--blue);color:var(--blue);font-size:9px" onclick="loadSharedView()">↻ REFRESH</button>
 </div>
 
 <!-- HEADER -->
-
 <div class="hdr">
   <div class="logo">
     ⬡ TONNAGE PARSER
@@ -232,182 +228,159 @@ tr.manual-row{background:rgba(74,158,255,0.025)!important}
 </div>
 
 <!-- LAYOUT -->
-
 <div class="layout" id="mainLayout">
 
   <!-- SIDEBAR -->
-
   <div class="sidebar" id="sidebar">
 
-```
-<!-- SSY -->
-<div class="sidebar-section">
-  <div class="sec-label"><span style="color:var(--ssy)">■ SSY</span><span style="color:var(--text3);font-size:9px">AIS-BASED</span></div>
-  <textarea class="paste-box" id="paste-ssy" placeholder="Paste SSY list...&#10;Vessel|DWT|Blt|Draft|Scrub|Owner|Port|OpenDate|AIS|ETA WA|Comment|Status"></textarea>
-  <button class="parse-btn ssy" onclick="parseSource('ssy')">⚡ PARSE SSY</button>
-  <div class="parse-result" id="res-ssy"></div>
-</div>
-
-<!-- ARROW -->
-<div class="sidebar-section">
-  <div class="sec-label"><span style="color:var(--arrow)">■ ARROW</span></div>
-  <textarea class="paste-box" id="paste-arrow" placeholder="Paste Arrow list...&#10;VESSEL|DWT|BLT|IMO|NWAUS|OPEN PORT|DATE|OWNER"></textarea>
-  <button class="parse-btn arrow" onclick="parseSource('arrow')">⚡ PARSE ARROW</button>
-  <div class="parse-result" id="res-arrow"></div>
-</div>
-
-<!-- IFCHOR -->
-<div class="sidebar-section">
-  <div class="sec-label"><span style="color:var(--ifchor)">■ IFCHOR</span></div>
-  <textarea class="paste-box" id="paste-ifchor" placeholder="Paste Ifchor list...&#10;SHIP NAME|DWT|DFT|BLT|DELIVERY|DELY FROM|DELY TO|OWNER&#10;&#10;ETA PH auto-calculated from port lookup table"></textarea>
-  <button class="parse-btn ifchor" onclick="parseSource('ifchor')">⚡ PARSE IFCHOR</button>
-  <div class="parse-result" id="res-ifchor"></div>
-</div>
-
-<!-- ACTIONS -->
-<div class="sidebar-section" style="border-bottom:none">
-  <div class="sec-label">ACTIONS</div>
-  <div style="display:flex;flex-direction:column;gap:6px">
-    <div style="display:flex;gap:6px">
-      <button class="action-btn btn-export" style="flex:1;padding:7px" onclick="exportCSV()">⬇ CSV</button>
-      <button class="action-btn" style="flex:1;padding:7px;background:rgba(240,180,41,0.08);color:var(--gold);border:1px solid var(--gold)" onclick="exportText()">📋 TEXT</button>
-      <button class="action-btn btn-add-row" style="flex:1;padding:7px" onclick="openAddRow()">+ ROW</button>
+    <!-- SSY -->
+    <div class="sidebar-section">
+      <div class="sec-label"><span style="color:var(--ssy)">■ SSY</span><span style="color:var(--text3);font-size:9px">AIS-BASED</span></div>
+      <textarea class="paste-box" id="paste-ssy" placeholder="Paste SSY list...&#10;Vessel|DWT|Blt|Draft|Scrub|Owner|Port|OpenDate|AIS|ETA WA|Comment|Status"></textarea>
+      <button class="parse-btn ssy" onclick="parseSource('ssy')">⚡ PARSE SSY</button>
+      <div class="parse-result" id="res-ssy"></div>
     </div>
-    <button class="action-btn btn-clear" style="width:100%;padding:7px" onclick="clearAll()">✕ CLEAR ALL</button>
-  </div>
 
-  <!-- PUBLISH PANEL -->
-  <div class="publish-panel">
-    <div class="sec-label" style="margin-bottom:6px">PUBLISH & SHARE</div>
-    <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);line-height:1.7;margin-bottom:8px">
-      Click Publish to save current list to a shared link your colleagues can view. Share the URL — they see a read-only live view.
+    <!-- ARROW -->
+    <div class="sidebar-section">
+      <div class="sec-label"><span style="color:var(--arrow)">■ ARROW</span></div>
+      <textarea class="paste-box" id="paste-arrow" placeholder="Paste Arrow list...&#10;VESSEL|DWT|BLT|IMO|NWAUS|OPEN PORT|DATE|OWNER"></textarea>
+      <button class="parse-btn arrow" onclick="parseSource('arrow')">⚡ PARSE ARROW</button>
+      <div class="parse-result" id="res-arrow"></div>
     </div>
-    <button class="action-btn btn-publish" onclick="publishList()">🚀 PUBLISH TONNAGE LIST</button>
-    <div style="margin-top:4px;text-align:right"><span onclick="localStorage.removeItem('ghGistToken');alert('Token cleared. You will be prompted on next publish.');" style="font-size:9px;color:var(--text3);cursor:pointer;font-family:\'IBM Plex Mono\',monospace">⚙ reset github token</span></div>
-    <div class="publish-status" id="publishStatus"></div>
-    <div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)">
-      SHARE URL:<br>
-      <span id="shareUrlDisplay" style="color:var(--blue);word-break:break-all;cursor:pointer" onclick="copyShareUrl()" title="Click to copy">—</span>
-    </div>
-  </div>
 
-  <div class="publish-panel" style="margin-top:8px">
-    <div class="sec-label" style="margin-bottom:6px">LOAD SHARED LIST</div>
-    <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);line-height:1.7;margin-bottom:8px">
-      Paste a share URL or Gist ID from a colleague to load their list in view mode.
+    <!-- IFCHOR -->
+    <div class="sidebar-section">
+      <div class="sec-label"><span style="color:var(--ifchor)">■ IFCHOR</span></div>
+      <textarea class="paste-box" id="paste-ifchor" placeholder="Paste Ifchor list...&#10;SHIP NAME|DWT|DFT|BLT|DELIVERY|DELY FROM|DELY TO|OWNER&#10;&#10;ETA PH auto-calculated from port lookup table"></textarea>
+      <button class="parse-btn ifchor" onclick="parseSource('ifchor')">⚡ PARSE IFCHOR</button>
+      <div class="parse-result" id="res-ifchor"></div>
     </div>
-    <div style="display:flex;gap:6px;align-items:center">
-      <input class="form-input" id="loadGistInput" placeholder="Paste URL or Gist ID..." style="flex:1;font-size:9px;padding:5px 7px">
-      <button class="action-btn" onclick="loadFromInput()" style="border-color:var(--teal);color:var(--teal);font-size:9px;padding:5px 10px;white-space:nowrap">↓ LOAD</button>
+
+    <!-- ACTIONS -->
+    <div class="sidebar-section" style="border-bottom:none">
+      <div class="sec-label">ACTIONS</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;gap:6px">
+          <button class="action-btn btn-export" style="flex:1;padding:7px" onclick="exportCSV()">⬇ CSV</button>
+          <button class="action-btn" style="flex:1;padding:7px;background:rgba(240,180,41,0.08);color:var(--gold);border:1px solid var(--gold)" onclick="exportText()">📋 TEXT</button>
+          <button class="action-btn btn-add-row" style="flex:1;padding:7px" onclick="openAddRow()">+ ROW</button>
+        </div>
+        <button class="action-btn btn-clear" style="width:100%;padding:7px" onclick="clearAll()">✕ CLEAR ALL</button>
+      </div>
+
+      <!-- PUBLISH PANEL -->
+      <div class="publish-panel">
+        <div class="sec-label" style="margin-bottom:6px">PUBLISH & SHARE</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);line-height:1.7;margin-bottom:8px">
+          Click Publish to save current list to a shared link your colleagues can view. Share the URL — they see a read-only live view.
+        </div>
+        <button class="action-btn btn-publish" onclick="publishList()">🚀 PUBLISH TONNAGE LIST</button>
+        <div class="publish-status" id="publishStatus"></div>
+        <div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)">
+          SHARE URL:<br>
+          <span id="shareUrlDisplay" style="color:var(--blue);word-break:break-all;cursor:pointer" onclick="copyShareUrl()" title="Click to copy">—</span>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);line-height:1.8">
+        LAST UPDATED: <span id="lastUpdate" style="color:var(--text2)">—</span><br>
+        <span style="color:var(--gold)">●</span> = 2+ sources confirmed (merged row)<br>
+        <span style="color:var(--purple)">●</span> = ETA manually overridden<br>
+        <span style="color:var(--blue)">●</span> = Manually added row<br>
+        <span style="color:var(--marketed)">★</span> = SSY "Given" (marketed)
+      </div>
     </div>
-    <div class="publish-status" id="loadStatus"></div>
-  </div>
-
-  <div style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);line-height:1.8">
-    LAST UPDATED: <span id="lastUpdate" style="color:var(--text2)">—</span><br>
-    <span style="color:var(--gold)">●</span> = 2+ sources confirmed (merged row)<br>
-    <span style="color:var(--purple)">●</span> = ETA manually overridden<br>
-    <span style="color:var(--blue)">●</span> = Manually added row<br>
-    <span style="color:var(--marketed)">★</span> = SSY "Given" (marketed)
-  </div>
-</div>
-```
-
   </div>
 
   <!-- MAIN TABLE -->
-
   <div class="main">
 
-```
-<!-- FILTER BAR — single row -->
-<div class="filter-wrap">
-  <div class="filter-row">
-    <span class="filter-label">SOURCE:</span>
-    <span class="filter-chip fc-all active" data-ftype="source" data-fval="all" onclick="toggleChip(this)">ALL</span>
-    <span class="filter-chip fc-ssy" data-ftype="source" data-fval="ssy" onclick="toggleChip(this)">SSY</span>
-    <span class="filter-chip fc-arrow" data-ftype="source" data-fval="arrow" onclick="toggleChip(this)">ARROW</span>
-    <span class="filter-chip fc-ifchor" data-ftype="source" data-fval="ifchor" onclick="toggleChip(this)">IFCHOR</span>
-    <span class="filter-chip fc-combo" data-ftype="source" data-fval="combo" onclick="toggleChip(this)" title="Shows: Ifchor + Arrow + SSY Marketed (Given) + Manual entries">IFCHOR + ARROW + SSY★ + MANUAL</span>
+    <!-- FILTER BAR — single row -->
+    <div class="filter-wrap">
+      <div class="filter-row">
+        <span class="filter-label">SOURCE:</span>
+        <span class="filter-chip fc-all active" data-ftype="source" data-fval="all" onclick="toggleChip(this)">ALL</span>
+        <span class="filter-chip fc-ssy" data-ftype="source" data-fval="ssy" onclick="toggleChip(this)">SSY</span>
+        <span class="filter-chip fc-arrow" data-ftype="source" data-fval="arrow" onclick="toggleChip(this)">ARROW</span>
+        <span class="filter-chip fc-ifchor" data-ftype="source" data-fval="ifchor" onclick="toggleChip(this)">IFCHOR</span>
+        <span class="filter-chip fc-combo" data-ftype="source" data-fval="combo" onclick="toggleChip(this)" title="Shows: Ifchor + Arrow + SSY Marketed (Given) only">IFCHOR + ARROW + SSY★</span>
 
-    <span class="filter-label" style="margin-left:8px">MARKETED:</span>
-    <span class="filter-chip fc-marketed" data-ftype="marketed" data-fval="yes" onclick="toggleChip(this)">★ MARKETED ONLY</span>
+        <span class="filter-label" style="margin-left:8px">MARKETED:</span>
+        <span class="filter-chip fc-marketed" data-ftype="marketed" data-fval="yes" onclick="toggleChip(this)">★ MARKETED ONLY</span>
 
-    <span class="filter-label" style="margin-left:8px">ETA PH:</span>
-    <span class="filter-chip fc-all active" data-ftype="eta" data-fval="all" onclick="toggleChip(this)">ALL</span>
-    <span class="filter-chip fc-eta7" data-ftype="eta" data-fval="7" onclick="toggleChip(this)">0–7D</span>
-    <span class="filter-chip fc-eta14" data-ftype="eta" data-fval="14" onclick="toggleChip(this)">8–14D</span>
-    <span class="filter-chip fc-eta21" data-ftype="eta" data-fval="21" onclick="toggleChip(this)">15–21D</span>
-    <span class="filter-chip fc-eta28" data-ftype="eta" data-fval="28" onclick="toggleChip(this)">22–28D</span>
+        <span class="filter-label" style="margin-left:8px">ETA PH:</span>
+        <span class="filter-chip fc-all active" data-ftype="eta" data-fval="all" onclick="toggleChip(this)">ALL</span>
+        <span class="filter-chip fc-eta7" data-ftype="eta" data-fval="7" onclick="toggleChip(this)">0–7D</span>
+        <span class="filter-chip fc-eta14" data-ftype="eta" data-fval="14" onclick="toggleChip(this)">8–14D</span>
+        <span class="filter-chip fc-eta21" data-ftype="eta" data-fval="21" onclick="toggleChip(this)">15–21D</span>
+        <span class="filter-chip fc-eta28" data-ftype="eta" data-fval="28" onclick="toggleChip(this)">22–28D</span>
 
-    <!-- Inline date range slider — compact, lives right after ETA tiles -->
-    <div class="inline-slider-wrap">
-      <span class="date-range-val" id="sliderFromLabel">—</span>
-      <input type="range" class="slider" id="sliderFrom" min="0" max="60" value="0" oninput="onSliderChange()">
-      <input type="range" class="slider" id="sliderTo" min="0" max="60" value="60" oninput="onSliderChange()">
-      <span class="date-range-val" id="sliderToLabel">—</span>
-      <span class="range-reset" onclick="resetSlider()">✕</span>
+        <!-- Inline date range slider — compact, lives right after ETA tiles -->
+        <div class="inline-slider-wrap">
+          <span class="date-range-val" id="sliderFromLabel">—</span>
+          <input type="range" class="slider" id="sliderFrom" min="0" max="60" value="0" oninput="onSliderChange()">
+          <input type="range" class="slider" id="sliderTo" min="0" max="60" value="60" oninput="onSliderChange()">
+          <span class="date-range-val" id="sliderToLabel">—</span>
+          <span class="range-reset" onclick="resetSlider()">✕</span>
+        </div>
+
+        <span class="filter-label" style="margin-left:8px">SIZE:</span>
+        <span class="filter-chip fc-all active" data-ftype="size" data-fval="all" onclick="toggleChip(this)">ALL</span>
+        <span class="filter-chip fc-cape" data-ftype="size" data-fval="cape" onclick="toggleChip(this)">CAPE 160–190K</span>
+        <span class="filter-chip fc-nmax" data-ftype="size" data-fval="nmax" onclick="toggleChip(this)">NMAX 190–220K</span>
+        <span class="filter-chip fc-vloc" data-ftype="size" data-fval="vloc" onclick="toggleChip(this)">VLOC 220K+</span>
+
+        <input class="search-box" id="searchBox" placeholder="Search vessel / owner..." oninput="renderTable()" style="margin-left:auto">
+        <button class="action-btn btn-export" onclick="exportCSV()" style="margin-left:4px">⬇ EXPORT</button>
+      </div>
     </div>
 
-    <span class="filter-label" style="margin-left:8px">SIZE:</span>
-    <span class="filter-chip fc-all active" data-ftype="size" data-fval="all" onclick="toggleChip(this)">ALL</span>
-    <span class="filter-chip fc-cape" data-ftype="size" data-fval="cape" onclick="toggleChip(this)">CAPE 160–190K</span>
-    <span class="filter-chip fc-nmax" data-ftype="size" data-fval="nmax" onclick="toggleChip(this)">NMAX 190–220K</span>
-    <span class="filter-chip fc-vloc" data-ftype="size" data-fval="vloc" onclick="toggleChip(this)">VLOC 220K+</span>
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th onclick="sortBy('etaPH')" id="th-etaPH">ETA PH <span class="sort-arrow">▼</span></th>
+            <th onclick="sortBy('name')" id="th-name">VESSEL NAME <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('dwt')" id="th-dwt">DWT <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('age')" id="th-age">BLT <span class="sort-arrow">↕</span></th>
+            <th class="no-sort">DRAFT</th>
+            <th class="no-sort">SCRUB</th>
+            <th onclick="sortBy('openPort')" id="th-openPort">OPEN PORT <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('openDate')" id="th-openDate">OPEN DATE <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('owner')" id="th-owner">OWNER <span class="sort-arrow">↕</span></th>
+            <th class="no-sort">SOURCE</th>
+            <th class="no-sort">MKT</th>
+            <th class="no-sort">OFFER ($/T)</th>
+            <th class="no-sort">COMMENTS</th>
+            <th class="no-sort"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="14"><div class="empty-state"><div class="empty-icon">⚓</div><div>PASTE TONNAGE LISTS FROM THE LEFT PANEL</div><div style="color:var(--text3);font-size:10px">SSY · ARROW · IFCHOR · OR ADD ROW MANUALLY</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
 
-    <input class="search-box" id="searchBox" placeholder="Search vessel / owner..." oninput="renderTable()" style="margin-left:auto">
-    <button class="action-btn btn-export" onclick="exportCSV()" style="margin-left:4px">⬇ EXPORT</button>
-  </div>
-</div>
-
-<!-- TABLE -->
-<div class="table-wrap">
-  <table id="mainTable">
-    <thead>
-      <tr>
-        <th onclick="sortBy('etaPH')" id="th-etaPH">ETA PH <span class="sort-arrow">▼</span></th>
-        <th onclick="sortBy('name')" id="th-name">VESSEL NAME <span class="sort-arrow">↕</span></th>
-        <th onclick="sortBy('dwt')" id="th-dwt">DWT <span class="sort-arrow">↕</span></th>
-        <th onclick="sortBy('age')" id="th-age">BLT <span class="sort-arrow">↕</span></th>
-        <th class="no-sort">DRAFT</th>
-        <th class="no-sort">SCRUB</th>
-        <th onclick="sortBy('openPort')" id="th-openPort">OPEN PORT <span class="sort-arrow">↕</span></th>
-        <th onclick="sortBy('openDate')" id="th-openDate">OPEN DATE <span class="sort-arrow">↕</span></th>
-        <th onclick="sortBy('owner')" id="th-owner">OWNER <span class="sort-arrow">↕</span></th>
-        <th class="no-sort">SOURCE</th>
-        <th class="no-sort">MKT</th>
-        <th class="no-sort">OFFER ($/T)</th>
-        <th class="no-sort">COMMENTS</th>
-        <th class="no-sort"></th>
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-      <tr><td colspan="14"><div class="empty-state"><div class="empty-icon">⚓</div><div>PASTE TONNAGE LISTS FROM THE LEFT PANEL</div><div style="color:var(--text3);font-size:10px">SSY · ARROW · IFCHOR · OR ADD ROW MANUALLY</div></div></td></tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- FOOTER -->
-<div class="footer">
-  <div class="footer-note">
-    <span><span class="legend-dot" style="background:var(--red)"></span>&lt;7d</span>
-    <span><span class="legend-dot" style="background:var(--orange)"></span>8–14d</span>
-    <span><span class="legend-dot" style="background:var(--teal)"></span>15–21d</span>
-    <span><span class="legend-dot" style="background:var(--text3)"></span>22+d</span>
-    <span><span style="color:var(--gold)">●</span> Confirmed 2+ sources</span>
-    <span><span style="color:var(--purple)">●</span> ETA overridden</span>
-    <span><span style="color:var(--blue)">+</span> Manual entry</span>
-    <span style="font-size:9px;color:var(--text3)">Click ETA to override · Click any chip to multi-select</span>
-  </div>
-  <div id="footerRight" style="color:var(--text3)">No data loaded</div>
-</div>
-```
-
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="footer-note">
+        <span><span class="legend-dot" style="background:var(--red)"></span>&lt;7d</span>
+        <span><span class="legend-dot" style="background:var(--orange)"></span>8–14d</span>
+        <span><span class="legend-dot" style="background:var(--teal)"></span>15–21d</span>
+        <span><span class="legend-dot" style="background:var(--text3)"></span>22+d</span>
+        <span><span style="color:var(--gold)">●</span> Confirmed 2+ sources</span>
+        <span><span style="color:var(--purple)">●</span> ETA overridden</span>
+        <span><span style="color:var(--blue)">+</span> Manual entry</span>
+        <span style="font-size:9px;color:var(--text3)">Click ETA to override · Click any chip to multi-select</span>
+      </div>
+      <div id="footerRight" style="color:var(--text3)">No data loaded</div>
+    </div>
   </div>
 </div>
 
 <!-- ADD ROW MODAL -->
-
 <div class="modal-overlay" id="addRowModal">
   <div class="modal">
     <div class="modal-title">+ ADD VESSEL MANUALLY</div>
@@ -470,7 +443,6 @@ tr.manual-row{background:rgba(74,158,255,0.025)!important}
 </div>
 
 <!-- EXPORT TEXT MODAL -->
-
 <div class="modal-overlay" id="exportModal">
   <div class="modal modal-lg">
     <div class="modal-title">EXPORT — MASTER TONNAGE LIST</div>
@@ -480,7 +452,6 @@ tr.manual-row{background:rgba(74,158,255,0.025)!important}
 </div>
 
 <!-- PUBLISH SHARE MODAL -->
-
 <div class="modal-overlay" id="shareModal">
   <div class="modal">
     <div class="modal-title">✓ PUBLISHED SUCCESSFULLY</div>
@@ -1169,12 +1140,11 @@ function renderTable(){
     if(!activeFilters.source.includes('all')){
       const srcs=v.mergedSources||[v.source];
       if(activeFilters.source.includes('combo')){
-        // COMBO: Ifchor OR Arrow OR (SSY + marketed) OR Manual
+        // COMBO: Ifchor OR Arrow OR (SSY + marketed)
         const hasIfchor = srcs.includes('ifchor');
         const hasArrow  = srcs.includes('arrow');
         const hasSsyMkt = srcs.includes('ssy') && v.marketed;
-        const isManual  = v.source === 'manual';
-        if(!hasIfchor && !hasArrow && !hasSsyMkt && !isManual) return false;
+        if(!hasIfchor && !hasArrow && !hasSsyMkt) return false;
       } else {
         if(!activeFilters.source.some(s=>srcs.includes(s))) return false;
       }
@@ -1464,36 +1434,21 @@ async function publishList(){
     }))
   };
 
-  // GitHub Gist token — create one at github.com/settings/tokens (gist scope only)
-  const GIST_TOKEN = localStorage.getItem('ghGistToken') || '';
-  if(!GIST_TOKEN){
-    const tok = prompt('Enter your GitHub Personal Access Token (gist scope only).\nCreate at: github.com/settings/tokens\n\nThis is saved locally and never leaves your device.');
-    if(!tok){statusEl.textContent='⚠ Cancelled — no token provided.';statusEl.className='publish-status err';return;}
-    localStorage.setItem('ghGistToken', tok.trim());
-  }
-
   try {
-    const resp = await fetch('https://api.github.com/gists', {
+    // Use JSONBin.io free tier — no auth needed for public bins
+    const resp = await fetch('https://api.jsonbin.io/v3/b', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github+json',
-        'Authorization': 'Bearer ' + localStorage.getItem('ghGistToken')
+        'X-Bin-Private': 'false',
+        'X-Bin-Name': 'Cape Desk Tonnage '+new Date().toLocaleDateString()
       },
-      body: JSON.stringify({
-        description: 'Cape Desk Tonnage List — ' + new Date().toLocaleString('en-SG', {timeZone:'Asia/Singapore'}),
-        public: false,
-        files: { 'tonnage.json': { content: JSON.stringify(payload) } }
-      })
+      body: JSON.stringify(payload)
     });
 
-    if(!resp.ok) {
-      // Bad token — clear it so user can re-enter next time
-      if(resp.status === 401) { localStorage.removeItem('ghGistToken'); }
-      throw new Error('GitHub API error ' + resp.status);
-    }
+    if(!resp.ok) throw new Error('API error '+resp.status);
     const data = await resp.json();
-    const binId = data.id;
+    const binId = data.metadata.id;
     publishedShareId = binId;
 
     const shareUrl = window.location.href.split('?')[0]+'?view='+binId;
@@ -1530,13 +1485,10 @@ async function loadSharedView(){
   document.getElementById('mainLayout').style.gridTemplateColumns='1fr';
 
   try {
-    const token = localStorage.getItem('ghGistToken') || '';
-    const hdrs = {'Accept':'application/vnd.github+json'};
-    if(token) hdrs['Authorization'] = 'Bearer '+token;
-    const resp=await fetch(`https://api.github.com/gists/${binId}`, {headers:hdrs});
+    const resp=await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`);
     if(!resp.ok) throw new Error('Could not load shared data.');
-    const gist=await resp.json();
-    const payload=JSON.parse(gist.files['tonnage.json'].content);
+    const data=await resp.json();
+    const payload=data.record;
 
     vessels=payload.vessels.map((v,i)=>({
       id:++idCounter,
@@ -1559,54 +1511,6 @@ async function loadSharedView(){
     renderTable(); updateStats();
   } catch(e) {
     document.getElementById('viewBanner').innerHTML='<span style="color:var(--red)">⚠ Could not load shared tonnage list. '+e.message+'</span>';
-  }
-}
-
-async function loadFromInput(){
-  const raw = document.getElementById('loadGistInput').value.trim();
-  if(!raw){return;}
-  const statusEl = document.getElementById('loadStatus');
-  statusEl.textContent='⏳ Loading...';statusEl.className='publish-status loading';
-
-  // Accept full URL (?view=ID) or bare Gist ID
-  let gistId = raw;
-  const match = raw.match(/[?&]view=([a-f0-9]+)/i) || raw.match(/gists\/([a-f0-9]+)/i) || raw.match(/^([a-f0-9]{20,})$/i);
-  if(match) gistId = match[1];
-
-  try {
-    const token = localStorage.getItem('ghGistToken') || '';
-    const hdrs = {'Accept':'application/vnd.github+json'};
-    if(token) hdrs['Authorization'] = 'Bearer '+token;
-    const resp = await fetch(`https://api.github.com/gists/${gistId}`, {headers:hdrs});
-    if(!resp.ok) throw new Error('Gist not found ('+resp.status+')');
-    const gist = await resp.json();
-    const payload = JSON.parse(gist.files['tonnage.json'].content);
-
-    vessels = payload.vessels.map(v=>({
-      id:++idCounter,
-      source:v.sources&&v.sources.length?v.sources[0]:'ssy',
-      name:v.name, dwt:v.dwt, age:v.age, draft:v.draft, scrubber:v.scrubber||'?',
-      openPort:v.openPort,
-      openDate:v.openDate?new Date(v.openDate):null,
-      etaPH:v.etaPH?new Date(v.etaPH):null,
-      owner:v.owner, marketed:v.marketed||false,
-      offer:v.offer||'', userComment:v.userComment||'',
-      etaOverride:v.etaOverride||false,
-      aisDest:'',comment:'',deleted:false,isDuplicate:false,
-      isMergedSecondary:false,
-      mergedSources:v.sources&&v.sources.length>1?v.sources:null
-    }));
-
-    const pubTime = new Date(payload.publishedAt);
-    const publisher = gist.owner?.login || 'colleague';
-    statusEl.textContent=`✓ Loaded ${vessels.length} vessels published by ${publisher} at ${pubTime.toLocaleString('en-SG',{timeZone:'Asia/Singapore'})}.`;
-    statusEl.className='publish-status ok';
-    document.getElementById('viewBanner').classList.add('show');
-    document.getElementById('viewBanner').innerHTML=`<span>👁 VIEW MODE — List by <b>${publisher}</b>, published ${pubTime.toLocaleString()}. ${vessels.length} vessels.</span><button class="action-btn" style="border-color:var(--blue);color:var(--blue);font-size:9px" onclick="loadFromInput()">↻ REFRESH</button>`;
-    renderTable(); updateStats();
-  } catch(e) {
-    statusEl.textContent='⚠ '+e.message;
-    statusEl.className='publish-status err';
   }
 }
 
@@ -1682,6 +1586,5 @@ updateStats();
 // Auto-load shared view if URL has ?view= param
 if(window.location.search.includes('view=')) loadSharedView();
 </script>
-
 </body>
 </html>
