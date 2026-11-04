@@ -351,6 +351,17 @@ tr.avoid-row td.c-name{opacity:1}
   .drop-row{grid-template-columns:1.4fr 0.8fr 1fr}
   .drop-row span:last-child{display:none}
 }
+
+.pill-filter{cursor:pointer;user-select:none;transition:all .12s}
+.pill-filter:hover{border-color:var(--gold)}
+.pill-filter.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,transparent);box-shadow:inset 0 0 0 1px var(--gold)}
+.chip-d{margin-left:5px;font-weight:400;opacity:0.75;font-size:9.5px}
+.age-cut{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.age-cut input{width:52px;padding:5px 6px;text-align:center}
+.age-cut button{margin-left:auto;padding:6px 10px}
+.fgroup{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;margin-right:10px}
+.fgroup .filter-label{margin-left:0!important}
+@media (max-width:760px){.fgroup{flex-wrap:nowrap;flex:0 0 auto}}
 </style>
 </head>
 <body>
@@ -377,7 +388,7 @@ tr.avoid-row td.c-name{opacity:1}
     <div class="stat-pill"><span style="color:var(--ifchor)">■</span> IFCHOR <span class="stat-val stat-ifchor" id="cnt-ifchor">0</span></div>
     <div class="stat-pill" style="border-color:var(--accent)"><span class="stat-val stat-total" id="cnt-total">0</span> <span style="color:var(--text3)">VESSELS</span></div>
     <div class="stat-pill"><span style="color:var(--marketed)">★</span> <span class="stat-val" style="color:var(--marketed)" id="cnt-marketed">0</span></div>
-    <div class="stat-pill" title="Vessels confirmed by 2 or more broker sources — merged into one row"><span style="color:var(--gold)">●</span> MULTI-SOURCE <span class="stat-val" style="color:var(--gold)" id="cnt-dupes">0</span></div>
+    <div class="stat-pill pill-filter" id="pillMulti" onclick="toggleMulti()" title="Tap to show only vessels reported by 2 or more brokers"><span style="color:var(--gold)">●</span> MULTI-SOURCE <span class="stat-val" style="color:var(--gold)" id="cnt-dupes">0</span></div>
     <div class="stat-pill" id="publishedBadge" style="display:none;border-color:var(--teal)">
       <span style="color:var(--teal)">✓ PUBLISHED</span> <span style="color:var(--text3)" id="publishedTime"></span>
     </div>
@@ -428,6 +439,12 @@ tr.avoid-row td.c-name{opacity:1}
           <button class="action-btn btn-baseline" style="flex:1;padding:7px" onclick="markBaseline()" title="Compare future lists against what's loaded now (also happens automatically when you publish)">◎ SET BASELINE</button>
         </div>
         <div id="baselineInfo" style="font-size:10px;color:var(--text3)"></div>
+        <div class="age-cut">
+          <span>Remove vessels aged</span>
+          <input type="number" id="ageCut" class="form-input" value="20" min="1" max="40" inputmode="numeric">
+          <span>yrs +</span>
+          <button class="action-btn btn-clear" onclick="removeOld()">REMOVE</button>
+        </div>
         <button class="action-btn btn-clear" style="width:100%;padding:7px" onclick="clearAll()">✕ CLEAR ALL</button>
       </div>
 
@@ -474,18 +491,21 @@ tr.avoid-row td.c-name{opacity:1}
     <!-- FILTER BAR — single row -->
     <div class="filter-wrap">
       <div class="filter-row">
+        <span class="fgroup">
         <span class="filter-label">SOURCE:</span>
         <span class="filter-chip fc-all active" data-ftype="source" data-fval="all" onclick="toggleChip(this)">ALL</span>
         <span class="filter-chip fc-ssy" data-ftype="source" data-fval="ssy" onclick="toggleChip(this)">SSY</span>
         <span class="filter-chip fc-arrow" data-ftype="source" data-fval="arrow" onclick="toggleChip(this)">ARROW</span>
         <span class="filter-chip fc-ifchor" data-ftype="source" data-fval="ifchor" onclick="toggleChip(this)">IFCHOR</span>
         <span class="filter-chip fc-combo" data-ftype="source" data-fval="combo" onclick="toggleChip(this)" title="Shows: Ifchor + Arrow + SSY Marketed (Given) + Manual entries">IFCHOR + ARROW + SSY★ + MANUAL</span>
-
+        </span>
+        <span class="fgroup">
         <span class="filter-label" style="margin-left:8px">MARKETED:</span>
         <span class="filter-chip fc-marketed" data-ftype="marketed" data-fval="yes" onclick="toggleChip(this)">★ MARKETED ONLY</span>
         <span class="filter-chip fc-changed" data-ftype="changed" data-fval="yes" onclick="toggleChip(this)" title="Only ships that are new or whose ETA moved since the last publish">Δ NEW / MOVED</span>
         <span class="filter-chip fc-flag" data-ftype="flag" data-fval="yes" onclick="toggleChip(this)" title="Hide owners and ships on your avoid list">⛔ HIDE AVOID</span>
-
+        </span>
+        <span class="fgroup">
         <span class="filter-label" style="margin-left:8px">ETA PH:</span>
         <span class="filter-chip fc-all active" data-ftype="eta" data-fval="all" onclick="toggleChip(this)">ALL</span>
         <span class="filter-chip fc-eta7" data-ftype="eta" data-fval="7" onclick="toggleChip(this)">0–7D</span>
@@ -501,13 +521,14 @@ tr.avoid-row td.c-name{opacity:1}
           <span class="date-range-val" id="sliderToLabel">—</span>
           <span class="range-reset" onclick="resetSlider()">✕</span>
         </div>
-
+        </span>
+        <span class="fgroup">
         <span class="filter-label" style="margin-left:8px">SIZE:</span>
         <span class="filter-chip fc-all active" data-ftype="size" data-fval="all" onclick="toggleChip(this)">ALL</span>
         <span class="filter-chip fc-cape" data-ftype="size" data-fval="cape" onclick="toggleChip(this)">CAPE 160–190K</span>
         <span class="filter-chip fc-nmax" data-ftype="size" data-fval="nmax" onclick="toggleChip(this)">NMAX 190–220K</span>
         <span class="filter-chip fc-vloc" data-ftype="size" data-fval="vloc" onclick="toggleChip(this)">VLOC 220K+</span>
-
+        </span>
         <select class="search-box mob-only" id="mobSort" onchange="mobileSort(this.value)">
           <option value="etaPH|asc">Sort: ETA PH</option>
           <option value="vage|desc">Sort: Oldest</option>
@@ -696,7 +717,8 @@ let activeFilters = {
   size:   ['all'],   // 'all','cape','nmax','vloc'
   marketed: [],      // 'yes' or empty
   changed: [],       // 'yes' = only new / ETA-moved vs baseline
-  flag: []           // 'yes' = hide owners/vessels on the avoid list
+  flag: [],          // 'yes' = hide owners/vessels on the avoid list
+  multi: []          // 'yes' = only vessels reported by 2+ brokers
 };
 let VIEW_MODE=false;
 // Date slider state (days from today)
@@ -1383,6 +1405,7 @@ function vesselPasses(v,activeFilters,search,noEta){
     if(activeFilters.marketed.includes('yes')&&!v.marketed) return false;
     if((activeFilters.changed||[]).includes('yes')&&!v._chg) return false;
     if((activeFilters.flag||[]).includes('yes')&&v._flag==='avoid') return false;
+    if((activeFilters.multi||[]).includes('yes')&&!(v.mergedSources&&v.mergedSources.length>1)) return false;
 
     // SIZE multi-select
     if(!activeFilters.size.includes('all')){
@@ -1457,6 +1480,7 @@ function filterContextLabel(){
   else if(!activeFilters.source.includes('all')) parts.push(activeFilters.source.map(x=>x.toUpperCase()).join('+'));
   if(!activeFilters.size.includes('all')) parts.push(activeFilters.size.map(x=>({cape:'Cape',nmax:'NMax',vloc:'VLOC'})[x]).join('+'));
   if(activeFilters.marketed.includes('yes')) parts.push('marketed only');
+  if((activeFilters.multi||[]).includes('yes')) parts.push('multi-source');
   const q=(document.getElementById('searchBox').value||'').trim(); if(q) parts.push(`"${q}"`);
   return parts.join(' · ');
 }
@@ -1611,6 +1635,41 @@ function pickWeek(a,b){
   onSliderChange();
 }
 
+function toggleMulti(){
+  activeFilters.multi=activeFilters.multi.includes('yes')?[]:['yes'];
+  document.getElementById('pillMulti').classList.toggle('on',activeFilters.multi.includes('yes'));
+  renderTable();
+}
+
+// ETA chips carry their real dates (0–7D → 4–11 Nov)
+function labelEtaChips(){
+  const R={'7':[0,7],'14':[8,14],'21':[15,21],'28':[22,28]};
+  const dd=n=>{const d=new Date(TODAY);d.setDate(d.getDate()+n);return d;};
+  const fmt=(a,b)=>a.getMonth()===b.getMonth()?`${a.getDate()}–${b.getDate()} ${MONTHS[b.getMonth()]}`:`${a.getDate()} ${MONTHS[a.getMonth()]}–${b.getDate()} ${MONTHS[b.getMonth()]}`;
+  document.querySelectorAll('.filter-chip[data-ftype="eta"]').forEach(c=>{
+    const r=R[c.dataset.fval]; if(!r) return;
+    let el=c.querySelector('.chip-d');
+    if(!el){el=document.createElement('span');el.className='chip-d';c.insertBefore(el,c.querySelector('.chip-n'));}
+    el.textContent=fmt(dd(r[0]),dd(r[1]));
+  });
+}
+
+// Remove all vessels aged X years or older (with confirmation)
+function removeOld(){
+  const inp=document.getElementById('ageCut');
+  const x=parseInt(inp.value,10);
+  if(!x||x<1){alert('Enter an age in years, e.g. 20.');inp.focus();return;}
+  const hit=activeVessels().filter(v=>{const a=vesselAge(v);return a!=null&&a>=x;});
+  if(!hit.length){alert(`No vessels aged ${x} years or older on the current list.`);return;}
+  hit.sort((a,b)=>vesselAge(b)-vesselAge(a));
+  const names=hit.slice(0,12).map(v=>`  • ${v.name} (${vesselAge(v)} yrs)`).join('\n')+(hit.length>12?`\n  …and ${hit.length-12} more`:'');
+  const ok=confirm(`Remove ${hit.length} vessel${hit.length>1?'s':''} aged ${x} years or older?\n\n${names}\n\nThey will be removed from the current list. Pasting a broker list again will bring them back.`);
+  if(!ok) return;
+  const keys=new Set(hit.map(v=>VKEY(v.name)));
+  vessels.forEach(v=>{if(keys.has(VKEY(v.name))) v.deleted=true;});
+  mergeDuplicates(); renderTable(); updateStats();
+}
+
 function renderTable(){
   const tbody=document.getElementById('tableBody');
   const search=(document.getElementById('searchBox').value||'').toLowerCase();
@@ -1618,6 +1677,7 @@ function renderTable(){
   hydrateNotes(); applyFlags(); computeChanges();
   let data=vessels.filter(v=>vesselPasses(v,activeFilters,search));
   updateChipCounts(search);
+  labelEtaChips();
   updateSummary(data);
   updateWeekStrip(search);
   const bi=document.getElementById('baselineInfo'); if(bi) bi.textContent=BASELINE?'Baseline: '+fmtStamp(BASELINE.at)+' ('+Object.keys(BASELINE.ships).length+' ships)':'No baseline yet — set one, or publish.';
