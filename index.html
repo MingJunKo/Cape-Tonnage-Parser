@@ -198,6 +198,10 @@ tr.manual-row{background:rgba(74,158,255,0.025)!important}
 /* View-only banner */
 .view-banner{background:rgba(74,158,255,0.08);border-bottom:1px solid rgba(74,158,255,0.2);padding:6px 16px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--blue);display:none;align-items:center;justify-content:space-between}
 .view-banner.show{display:flex}
+.age-col{font-family:'IBM Plex Mono',monospace;text-align:center}
+.age-ok{color:var(--text2)}
+.age-gold{color:var(--gold);font-weight:600}
+.age-red{color:var(--red);font-weight:600}
 </style>
 </head>
 <body>
@@ -358,6 +362,7 @@ tr.manual-row{background:rgba(74,158,255,0.025)!important}
             <th onclick="sortBy('name')" id="th-name">VESSEL NAME <span class="sort-arrow">↕</span></th>
             <th onclick="sortBy('dwt')" id="th-dwt">DWT <span class="sort-arrow">↕</span></th>
             <th onclick="sortBy('age')" id="th-age">BLT <span class="sort-arrow">↕</span></th>
+            <th onclick="sortBy('vage')" id="th-vage">AGE <span class="sort-arrow">↕</span></th>
             <th class="no-sort">DRAFT</th>
             <th class="no-sort">SCRUB</th>
             <th onclick="sortBy('openPort')" id="th-openPort">OPEN PORT <span class="sort-arrow">↕</span></th>
@@ -371,7 +376,7 @@ tr.manual-row{background:rgba(74,158,255,0.025)!important}
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr><td colspan="14"><div class="empty-state"><div class="empty-icon">⚓</div><div>PASTE TONNAGE LISTS FROM THE LEFT PANEL</div><div style="color:var(--text3);font-size:10px">SSY · ARROW · IFCHOR · OR ADD ROW MANUALLY</div></div></td></tr>
+          <tr><td colspan="15"><div class="empty-state"><div class="empty-icon">⚓</div><div>PASTE TONNAGE LISTS FROM THE LEFT PANEL</div><div style="color:var(--text3);font-size:10px">SSY · ARROW · IFCHOR · OR ADD ROW MANUALLY</div></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -570,6 +575,21 @@ function parseDate(str) {
   m = str.match(/(\d{1,2})(?:\-\d{1,2})?([A-Za-z]{3})(\d{2,4})/);
   if(m){const y=parseInt(m[3])<100?2000+parseInt(m[3]):parseInt(m[3]);const mo=MONTH_MAP[m[2].toLowerCase()];if(mo!==undefined)return new Date(y,mo,parseInt(m[1]))}
   return null;
+}
+
+// Built year: parsers store 2-digit ('17) or 4-digit (2017) years in v.age
+function builtYear(v){
+  if(v.age==null||isNaN(v.age)) return null;
+  const y=+v.age; if(y>=1900) return y;
+  const cur=new Date().getFullYear()%100;
+  return y<=cur+1?2000+y:1900+y;
+}
+function bltLabel(v){const y=builtYear(v);return y==null?'':"'"+String(y%100).padStart(2,'0');}
+function vesselAge(v){const y=builtYear(v);return y==null?null:new Date().getFullYear()-y;}
+function ageHTML(v){
+  const a=vesselAge(v); if(a==null) return '—';
+  const cls=a>18?'age-red':a>15?'age-gold':'age-ok';
+  return `<span class="${cls}">${a}</span>`;
 }
 
 function fmtDate(d){
@@ -1209,7 +1229,8 @@ function renderTable(){
     let av,bv;
     if(sortCol==='etaPH'){av=a.etaPH?a.etaPH.getTime():99999999999;bv=b.etaPH?b.etaPH.getTime():99999999999;}
     else if(sortCol==='dwt'){av=a.dwt||0;bv=b.dwt||0;}
-    else if(sortCol==='age'){av=a.age||0;bv=b.age||0;}
+    else if(sortCol==='age'){av=builtYear(a)||0;bv=builtYear(b)||0;}
+    else if(sortCol==='vage'){av=vesselAge(a)??-1;bv=vesselAge(b)??-1;}
     else if(sortCol==='openDate'){av=a.openDate?a.openDate.getTime():99999999999;bv=b.openDate?b.openDate.getTime():99999999999;}
     else{av=(a[sortCol]||'').toString().toLowerCase();bv=(b[sortCol]||'').toString().toLowerCase();}
     if(av<bv) return sortDir==='asc'?-1:1;
@@ -1218,7 +1239,7 @@ function renderTable(){
   });
 
   if(data.length===0){
-    tbody.innerHTML='<tr><td colspan="14"><div class="empty-state"><div class="empty-icon">⚓</div><div>'+(vessels.filter(v=>!v.deleted&&!v.isMergedSecondary).length>0?'NO VESSELS MATCH CURRENT FILTERS':'PASTE TONNAGE LISTS FROM THE LEFT PANEL')+'</div></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="15"><div class="empty-state"><div class="empty-icon">⚓</div><div>'+(vessels.filter(v=>!v.deleted&&!v.isMergedSecondary).length>0?'NO VESSELS MATCH CURRENT FILTERS':'PASTE TONNAGE LISTS FROM THE LEFT PANEL')+'</div></div></td></tr>';
     document.getElementById('footerRight').textContent='No vessels shown';
     return;
   }
@@ -1257,7 +1278,8 @@ function renderTable(){
       <td class="eta-ph">${etaDisplay}</td>
       <td class="vessel-name">${v.name}${confDot}${manDot}</td>
       <td class="dwt-col">${v.dwt?v.dwt.toLocaleString():'—'}</td>
-      <td>${v.age!=null?"'"+String(v.age).padStart(2,'0'):'—'}</td>
+      <td>${v.age!=null?bltLabel(v):'—'}</td>
+      <td class="age-col">${ageHTML(v)}</td>
       <td>${v.draft?v.draft.toFixed(1):'—'}</td>
       <td>${scrubHTML(v)}</td>
       <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${v.openPort||'—'}</td>
@@ -1610,10 +1632,10 @@ function copyShareUrl(){
 function exportCSV(){
   const active=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
   if(!active.length){alert('No vessels to export.');return;}
-  const rows=[['ETA PH','VESSEL NAME','DWT','BLT','DRAFT','SCRUBBER','OPEN PORT','OPEN DATE','OWNER','SOURCE','MARKETED','OFFER ($/T)','COMMENTS']];
+  const rows=[['ETA PH','VESSEL NAME','DWT','BLT','AGE','DRAFT','SCRUBBER','OPEN PORT','OPEN DATE','OWNER','SOURCE','MARKETED','OFFER ($/T)','COMMENTS']];
   const sorted=[...active].sort((a,b)=>(a.etaPH?.getTime()||9e12)-(b.etaPH?.getTime()||9e12));
   sorted.forEach(v=>rows.push([
-    fmtDate(v.etaPH),v.name,v.dwt||'',v.age!=null?"'"+String(v.age).padStart(2,'0'):'',
+    fmtDate(v.etaPH),v.name,v.dwt||'',v.age!=null?bltLabel(v):'',vesselAge(v)??'',
     v.draft||'',v.scrubber||'',v.openPort||'',fmtDate(v.openDate),v.owner||'',
     (v.mergedSources||[v.source]).map(s=>s.toUpperCase()).join(', '),
     v.marketed?'YES':'',v.offer||'',v.userComment||''
@@ -1631,11 +1653,11 @@ function exportText(){
   if(!active.length){alert('No vessels loaded.');return;}
   const sorted=[...active].sort((a,b)=>(a.etaPH?.getTime()||9e12)-(b.etaPH?.getTime()||9e12));
   const pad=(s,n)=>String(s||'—').padEnd(n);
-  const header=pad('ETA PH',10)+pad('VESSEL NAME',26)+pad('DWT',10)+pad('BLT',6)+pad('OPEN PORT',18)+pad('OPEN DATE',12)+pad('OWNER',20)+pad('SRC',16)+pad('OFFER',10)+'MKT';
+  const header=pad('ETA PH',10)+pad('VESSEL NAME',26)+pad('DWT',10)+pad('BLT',6)+pad('AGE',5)+pad('OPEN PORT',18)+pad('OPEN DATE',12)+pad('OWNER',20)+pad('SRC',16)+pad('OFFER',10)+'MKT';
   const sep='─'.repeat(130);
   const lines=sorted.map(v=>
     pad(fmtDate(v.etaPH),10)+pad(v.name,26)+pad(v.dwt?v.dwt.toLocaleString():'—',10)+
-    pad(v.age!=null?"'"+String(v.age).padStart(2,'0'):'—',6)+pad(v.openPort,18)+
+    pad(v.age!=null?bltLabel(v):'—',6)+pad(vesselAge(v)??'—',5)+pad(v.openPort,18)+
     pad(fmtDate(v.openDate),12)+pad(v.owner,20)+
     pad((v.mergedSources||[v.source]).map(s=>s.toUpperCase()).join('+'),16)+
     pad(v.offer||'',10)+(v.marketed?'★':'')
