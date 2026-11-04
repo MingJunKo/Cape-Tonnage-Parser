@@ -288,6 +288,23 @@ thead tr{box-shadow:0 1px 0 var(--border2)}
   .add-row-form{grid-template-columns:1fr}
   .modal{padding:16px}
 }
+
+/* LIVE COUNTS */
+.chip-n{display:inline-block;margin-left:6px;padding:0 5px;border-radius:8px;font-size:9.5px;font-weight:600;background:color-mix(in srgb,var(--text3) 16%,transparent);color:var(--text2);min-width:16px;text-align:center}
+.filter-chip.active .chip-n{background:color-mix(in srgb,currentColor 18%,transparent);color:inherit}
+.summary-bar{display:flex;align-items:center;justify-content:space-between;gap:10px 18px;flex-wrap:wrap;padding:8px 14px;background:var(--bg);border-top:1px solid var(--border)}
+.sum-main{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sum-n{font-size:26px;font-weight:600;color:var(--accent);line-height:1}
+.sum-unit{font-size:12px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:0.6px}
+.sum-win{font-size:12px;color:var(--text2)}
+.sum-stats{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;font-size:12px;color:var(--text2)}
+.sum-stat b{color:var(--text);font-weight:600}
+.sum-copy{padding:3px 9px;font-size:11px}
+@media (max-width:760px){
+  .summary-bar{padding:8px 12px;gap:4px 10px}
+  .sum-n{font-size:24px}
+  .sum-stats{gap:4px 10px;font-size:11.5px}
+}
 </style>
 </head>
 <body>
@@ -449,6 +466,7 @@ thead tr{box-shadow:0 1px 0 var(--border2)}
         <input class="search-box" id="searchBox" placeholder="Search vessel / owner..." oninput="renderTable()" style="margin-left:auto">
         <button class="action-btn btn-export" onclick="exportCSV()" style="margin-left:4px">⬇ EXPORT</button>
       </div>
+      <div class="summary-bar" id="summaryBar" style="display:none"></div>
     </div>
 
     <!-- TABLE -->
@@ -1259,11 +1277,7 @@ function showResult(src,type,msg){
 // ============================================================
 // RENDER TABLE
 // ============================================================
-function renderTable(){
-  const tbody=document.getElementById('tableBody');
-  const search=(document.getElementById('searchBox').value||'').toLowerCase();
-
-  let data=vessels.filter(v=>{
+function vesselPasses(v,activeFilters,search){
     if(v.deleted) return false;
     if(v.isMergedSecondary) return false;
 
@@ -1320,7 +1334,83 @@ function renderTable(){
       if(!hay.includes(search)) return false;
     }
     return true;
+}
+
+// ============================================================
+// LIVE COUNTS — chip counts + summary of what's on screen
+// ============================================================
+const SIZE_OF=v=>v.dwt>=220000?'vloc':v.dwt>=190000?'nmax':v.dwt>=160000?'cape':'other';
+function updateChipCounts(search){
+  const pool=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
+  document.querySelectorAll('.filter-chip[data-ftype]').forEach(chip=>{
+    const t=chip.dataset.ftype, val=chip.dataset.fval;
+    const f={...activeFilters};
+    f[t]= t==='marketed'?['yes']:[val];
+    const n=pool.filter(v=>vesselPasses(v,f,search)).length;
+    let b=chip.querySelector('.chip-n');
+    if(!b){b=document.createElement('span');b.className='chip-n';chip.appendChild(b);}
+    b.textContent=n;
   });
+}
+function etaWindowLabel(){
+  const R={'7':[0,7],'14':[8,14],'21':[15,21],'28':[22,28]};
+  let ranges=activeFilters.eta.includes('all')?[[0,null]]:activeFilters.eta.map(e=>R[e]).filter(Boolean).sort((a,b)=>a[0]-b[0]);
+  // merge touching ranges (0–7 + 8–14 → 0–14)
+  const m=[];ranges.forEach(r=>{const l=m[m.length-1];if(l&&l[1]!=null&&r[0]<=l[1]+1)l[1]=r[1]==null?null:Math.max(l[1],r[1]);else m.push([...r]);});
+  // apply slider
+  const out=m.map(([a,b])=>[Math.max(a,sliderFrom),sliderTo<60?(b==null?sliderTo:Math.min(b,sliderTo)):b]).filter(([a,b])=>b==null||a<=b);
+  const dd=n=>{const d=new Date(TODAY);d.setDate(d.getDate()+n);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});};
+  if(!out.length) return 'no ETA window';
+  return out.map(([a,b])=>b==null?(a===0?'all ETAs':`${a}d+ (from ${dd(a)})`):`${a}–${b}d (${dd(a)}–${dd(b)})`).join(' + ');
+}
+function filterContextLabel(){
+  const parts=[];
+  if(activeFilters.source.includes('combo')) parts.push('Ifchor+Arrow+SSY★+manual');
+  else if(!activeFilters.source.includes('all')) parts.push(activeFilters.source.map(x=>x.toUpperCase()).join('+'));
+  if(!activeFilters.size.includes('all')) parts.push(activeFilters.size.map(x=>({cape:'Cape',nmax:'NMax',vloc:'VLOC'})[x]).join('+'));
+  if(activeFilters.marketed.includes('yes')) parts.push('marketed only');
+  const q=(document.getElementById('searchBox').value||'').trim(); if(q) parts.push(`"${q}"`);
+  return parts.join(' · ');
+}
+let lastSummaryText='';
+function updateSummary(data){
+  const el=document.getElementById('summaryBar'); if(!el) return;
+  const total=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary).length;
+  if(!total){el.style.display='none';return;}
+  el.style.display='';
+  const sz={cape:0,nmax:0,vloc:0,other:0}; data.forEach(v=>sz[SIZE_OF(v)]++);
+  const mkt=data.filter(v=>v.marketed).length;
+  const ages=data.map(vesselAge).filter(a=>a!=null);
+  const o15=ages.filter(a=>a>15&&a<=18).length, o18=ages.filter(a=>a>18).length;
+  const avg=ages.length?(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1):'—';
+  const win=etaWindowLabel(), ctx=filterContextLabel();
+  const sizeTxt=[['cape','Cape'],['nmax','NMax'],['vloc','VLOC'],['other','<160k']].filter(([k])=>sz[k]).map(([k,l])=>`${sz[k]} ${l}`).join(' / ');
+  el.innerHTML=`
+    <div class="sum-main"><span class="sum-n">${data.length}</span><span class="sum-unit">ship${data.length===1?'':'s'}</span>
+      <span class="sum-win">ETA PH ${win}${ctx?` · ${escHtml(ctx)}`:''}</span></div>
+    <div class="sum-stats">
+      <span class="sum-stat">${sizeTxt||'—'}</span>
+      <span class="sum-stat"><b style="color:var(--gold)">★ ${mkt}</b> marketed</span>
+      <span class="sum-stat">avg age <b>${avg}</b></span>
+      ${o15?`<span class="sum-stat"><b class="age-gold">${o15}</b> aged 16–18</span>`:''}
+      ${o18?`<span class="sum-stat"><b class="age-red">${o18}</b> over 18</span>`:''}
+      <button class="icon-btn sum-copy" onclick="copySummary(this)" title="Copy a one-line summary to paste into chat">⧉ Copy</button>
+    </div>`;
+  lastSummaryText=`${data.length} ship${data.length===1?'':'s'} ETA PH ${win}${ctx?` [${ctx}]`:''}${sizeTxt?` — ${sizeTxt}`:''}; ${mkt} marketed; avg age ${avg}${o18?`; ${o18} over 18 yrs`:''}`;
+}
+function copySummary(btn){
+  const done=()=>{const t=btn.textContent;btn.textContent='✓ Copied';setTimeout(()=>btn.textContent=t,1500);};
+  if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(lastSummaryText).then(done,()=>prompt('Copy:',lastSummaryText));
+  else prompt('Copy:',lastSummaryText);
+}
+
+function renderTable(){
+  const tbody=document.getElementById('tableBody');
+  const search=(document.getElementById('searchBox').value||'').toLowerCase();
+
+  let data=vessels.filter(v=>vesselPasses(v,activeFilters,search));
+  updateChipCounts(search);
+  updateSummary(data);
 
   // SORT
   data.sort((a,b)=>{
