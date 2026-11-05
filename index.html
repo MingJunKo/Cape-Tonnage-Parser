@@ -969,6 +969,8 @@ function mergeDuplicates(){
 
     // Fill missing fields from secondaries
     grp.slice(1).forEach(sec=>{
+      if((primary.age==null||isNaN(primary.age))&&sec.age!=null&&!isNaN(sec.age)) primary.age=sec.age;
+      if(!primary.dwt&&sec.dwt) primary.dwt=sec.dwt;
       if(!primary.draft&&sec.draft) primary.draft=sec.draft;
       if(!primary.openDate&&sec.openDate) primary.openDate=sec.openDate;
       if(!primary.openPort&&sec.openPort) primary.openPort=sec.openPort;
@@ -1889,9 +1891,9 @@ function clearAll(){
 // ============================================================
 function updateStats(){
   const active=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
-  document.getElementById('cnt-ssy').textContent=vessels.filter(v=>!v.deleted&&(v.source==='ssy'||(v.mergedSources||[]).includes('ssy'))).length;
-  document.getElementById('cnt-arrow').textContent=vessels.filter(v=>!v.deleted&&(v.source==='arrow'||(v.mergedSources||[]).includes('arrow'))).length;
-  document.getElementById('cnt-ifchor').textContent=vessels.filter(v=>!v.deleted&&(v.source==='ifchor'||(v.mergedSources||[]).includes('ifchor'))).length;
+  document.getElementById('cnt-ssy').textContent=active.filter(v=>(v.mergedSources||[v.source]).includes('ssy')).length;
+  document.getElementById('cnt-arrow').textContent=active.filter(v=>(v.mergedSources||[v.source]).includes('arrow')).length;
+  document.getElementById('cnt-ifchor').textContent=active.filter(v=>(v.mergedSources||[v.source]).includes('ifchor')).length;
   document.getElementById('cnt-total').textContent=active.length;
   document.getElementById('cnt-marketed').textContent=active.filter(v=>v.marketed).length;
   document.getElementById('cnt-dupes').textContent=active.filter(v=>v.mergedSources&&v.mergedSources.length>1).length;
