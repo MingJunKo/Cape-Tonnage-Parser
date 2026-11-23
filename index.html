@@ -1672,6 +1672,18 @@ function removeOld(){
   mergeDuplicates(); renderTable(); updateStats();
 }
 
+let lastView=[];
+function viewForExport(){
+  // exactly what is on screen: current filters, search and sort
+  if(!activeVessels().length){alert('No vessels loaded.');return null;}
+  if(!lastView.length){alert('No vessels match the current filters, so there is nothing to export.');return null;}
+  return lastView;
+}
+function exportFilterNote(){
+  const ctx=filterContextLabel();
+  return 'ETA PH '+etaWindowLabel()+(ctx?' · '+ctx:'');
+}
+
 function renderTable(){
   const tbody=document.getElementById('tableBody');
   const search=(document.getElementById('searchBox').value||'').toLowerCase();
@@ -1697,6 +1709,7 @@ function renderTable(){
     if(av>bv) return sortDir==='asc'?1:-1;
     return 0;
   });
+  lastView=data;
 
   if(data.length===0){
     tbody.innerHTML='<tr><td colspan="15"><div class="empty-state"><div class="empty-icon">⚓</div><div>'+(vessels.filter(v=>!v.deleted&&!v.isMergedSecondary).length>0?'NO VESSELS MATCH CURRENT FILTERS':'PASTE TONNAGE LISTS FROM THE LEFT PANEL')+'</div></div></td></tr>';
@@ -2122,28 +2135,25 @@ applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'dark':'
 // EXPORT
 // ============================================================
 function exportCSV(){
-  const active=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
-  if(!active.length){alert('No vessels to export.');return;}
+  const sorted=viewForExport(); if(!sorted) return;
   const rows=[['ETA PH','VESSEL NAME','DWT','BLT','AGE','DRAFT','SCRUBBER','OPEN PORT','OPEN DATE','OWNER','SOURCE','MARKETED','OFFER ($/T)','COMMENTS']];
-  const sorted=[...active].sort((a,b)=>(a.etaPH?.getTime()||9e12)-(b.etaPH?.getTime()||9e12));
   sorted.forEach(v=>rows.push([
     fmtDate(v.etaPH),v.name,v.dwt||'',v.age!=null?bltLabel(v):'',vesselAge(v)??'',
     v.draft||'',v.scrubber||'',v.openPort||'',fmtDate(v.openDate),v.owner||'',
     (v.mergedSources||[v.source]).map(s=>s.toUpperCase()).join(', '),
     v.marketed?'YES':'',v.offer||'',v.userComment||''
   ]));
-  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv'});
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;
-  a.download='tonnage_list_PH_'+new Date().toISOString().slice(0,10)+'.csv';
+  const all=sorted.length===activeVessels().length;
+  a.download='tonnage_list_PH_'+new Date().toISOString().slice(0,10)+(all?'':'_filtered_'+sorted.length)+'.csv';
   a.click(); URL.revokeObjectURL(url);
 }
 
 function exportText(){
-  const active=vessels.filter(v=>!v.deleted&&!v.isMergedSecondary);
-  if(!active.length){alert('No vessels loaded.');return;}
-  const sorted=[...active].sort((a,b)=>(a.etaPH?.getTime()||9e12)-(b.etaPH?.getTime()||9e12));
+  const sorted=viewForExport(); if(!sorted) return;
   const pad=(s,n)=>String(s||'—').padEnd(n);
   const header=pad('ETA PH',10)+pad('VESSEL NAME',26)+pad('DWT',10)+pad('BLT',6)+pad('AGE',5)+pad('OPEN PORT',18)+pad('OPEN DATE',12)+pad('OWNER',20)+pad('SRC',16)+pad('OFFER',10)+'MKT';
   const sep='─'.repeat(130);
@@ -2154,7 +2164,7 @@ function exportText(){
     pad((v.mergedSources||[v.source]).map(s=>s.toUpperCase()).join('+'),16)+
     pad(v.offer||'',10)+(v.marketed?'★':'')
   );
-  const text=`TONNAGE LIST — PORT HEDLAND ETA\nGenerated: ${new Date().toLocaleString()}\n${sep}\n${header}\n${sep}\n${lines.join('\n')}\n${sep}\nTotal: ${sorted.length} vessels`;
+  const text=`TONNAGE LIST — PORT HEDLAND ETA\nGenerated: ${new Date().toLocaleString()}\nView: ${exportFilterNote()}\n${sep}\n${header}\n${sep}\n${lines.join('\n')}\n${sep}\nTotal: ${sorted.length} vessels${sorted.length<activeVessels().length?` (of ${activeVessels().length} loaded)`:''}`;
   document.getElementById('exportTextArea').value=text;
   document.getElementById('exportModal').classList.add('open');
 }
