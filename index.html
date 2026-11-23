@@ -2155,14 +2155,14 @@ function exportCSV(){
 function exportText(){
   const sorted=viewForExport(); if(!sorted) return;
   const pad=(s,n)=>String(s||'—').padEnd(n);
-  const header=pad('ETA PH',10)+pad('VESSEL NAME',26)+pad('DWT',10)+pad('BLT',6)+pad('AGE',5)+pad('OPEN PORT',18)+pad('OPEN DATE',12)+pad('OWNER',20)+pad('SRC',16)+pad('OFFER',10)+'MKT';
-  const sep='─'.repeat(130);
+  const header=pad('ETA PH',10)+pad('VESSEL NAME',26)+pad('DWT',10)+pad('BLT',6)+pad('AGE',5)+pad('OPEN PORT',18)+pad('OPEN DATE',12)+pad('OWNER',20)+pad('SRC',16)+pad('OFFER',10)+pad('MKT',5)+'COMMENTS';
+  const sep='─'.repeat(150);
   const lines=sorted.map(v=>
     pad(fmtDate(v.etaPH),10)+pad(v.name,26)+pad(v.dwt?v.dwt.toLocaleString():'—',10)+
     pad(v.age!=null?bltLabel(v):'—',6)+pad(vesselAge(v)??'—',5)+pad(v.openPort,18)+
     pad(fmtDate(v.openDate),12)+pad(v.owner,20)+
     pad((v.mergedSources||[v.source]).map(s=>s.toUpperCase()).join('+'),16)+
-    pad(v.offer||'',10)+(v.marketed?'★':'')
+    pad(v.offer||'',10)+pad(v.marketed?'★':'',5)+(v.userComment||'').replace(/\s+/g,' ').trim()
   );
   const text=`TONNAGE LIST — PORT HEDLAND ETA\nGenerated: ${new Date().toLocaleString()}\nView: ${exportFilterNote()}\n${sep}\n${header}\n${sep}\n${lines.join('\n')}\n${sep}\nTotal: ${sorted.length} vessels${sorted.length<activeVessels().length?` (of ${activeVessels().length} loaded)`:''}`;
   document.getElementById('exportTextArea').value=text;
